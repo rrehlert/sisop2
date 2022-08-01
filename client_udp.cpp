@@ -70,7 +70,17 @@ int main(int argc, char *argv[])
 			printf("ERROR recvfrom");
 		printf("Got an ack: %s\n", buffer);
 		printf("Server ip: %s\n", inet_ntoa(from.sin_addr));
-		printf("Server ip: %s\n", inet_ntoa(serv_addr.sin_addr));
+		printf("Server PORT: %d\n", ntohs(from.sin_port));
+
+		server = gethostbyaddr(&(from.sin_addr), sizeof(from.sin_addr), AF_INET);
+		//server = gethostbyname(inet_ntoa(from.sin_addr));
+		if (server == NULL)
+			printf("Couldn't get host name, using: %s\n", inet_ntoa(from.sin_addr));
+		else
+			printf("Server NAME: %s\n", server->h_name);
+
+		// printf("Server ip: %s\n", inet_ntoa(serv_addr.sin_addr));
+		// printf("Server PORT: %d\n", ntohs(serv_addr.sin_port));
 		sleep(1);
 		n = sendto(sockfd, "Hello\n", 6, 0, (const struct sockaddr *) &from, sizeof(struct sockaddr_in));
 		if (n < 0) 

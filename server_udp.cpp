@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
 		if (n < 0) 
 			printf("ERROR on recvfrom");
 		printf("Client ip: %s\n", inet_ntoa(cli_addr.sin_addr));
+		//printf("Client PORT: %s\n", ntohs(&cli_addr.sin_port));
 		printf("Received a datagram: %s\n", buf);
 
 		// n = recv(sockfd, buf, 256, 0);
