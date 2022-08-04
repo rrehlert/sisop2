@@ -6,102 +6,104 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
+#include <string>
+#include <iostream>
 #include <time.h>
 
 #define PORT 4000
 #define BROADCAST_IP "255.255.255.255"
 
-int main(int argc, char *argv[])
-{
+using namespace std;
+
+int main(int argc, char *argv[]) {
   int mng_sock_fd, ptcp_sock_fd, send_res, recv_res;
-	unsigned int length;
-	struct sockaddr_in ptcp_addr, mng_addr, broadcast_addr, from;
-	struct hostent *server;
+	struct sockaddr_in ptcp_addr, mng_addr, broadcast_addr;
+	struct hostent *host_struct;
+	unsigned int length = sizeof(struct sockaddr_in);
 	char buffer[256];
-	char input[256];
 	int broadcastPermission = 1;
   bool manager = false;
+	string hostname;
 
-	if (argc > 0 && argv[0] == "manager") 
+	if (argc > 1 && (string)argv[1] == "manager") {
     manager = true;
-	
+		cout << "Role: [M]" << endl;
+	}
 
-  if (manager) {
+  if (manager == true) {
     if ((mng_sock_fd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-      printf("ERROR opening manager socket");
-    if (setsockopt(mng_sock_fd, SOL_SOCKET,SO_BROADCAST, &broadcastPermission, sizeof(broadcastPermission)) < 0){
-      fprintf(stderr, "setsockopt error");
+      cerr << "[M] ERROR opening socket" << endl;
+    if (setsockopt(mng_sock_fd, SOL_SOCKET, SO_BROADCAST, &broadcastPermission, sizeof(broadcastPermission)) < 0){
+      cerr << "[M] setsockopt error" << endl;
       exit(1);
     }
     broadcast_addr.sin_family = AF_INET;
     broadcast_addr.sin_port = htons(PORT);
     broadcast_addr.sin_addr.s_addr = inet_addr(BROADCAST_IP);
-    bzero(&(broadcast_addr.sin_zero), 8);
   }
   else {
+		cout << "Role: [P]" << endl;
     if ((ptcp_sock_fd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-      printf("ERROR opening participant socket");
+      cerr << "[P] ERROR opening socket" << endl;
+		if (setsockopt(ptcp_sock_fd, SOL_SOCKET, SO_BROADCAST, &broadcastPermission, sizeof(broadcastPermission)) < 0){
+      cerr << "[P] setsockopt error" << endl;
+      exit(1);
+    }
+
     ptcp_addr.sin_family = AF_INET;
     ptcp_addr.sin_port = htons(PORT);
     ptcp_addr.sin_addr.s_addr = INADDR_ANY;
-    bzero(&(ptcp_addr.sin_zero), 8);
+
+		if (bind(ptcp_sock_fd, (struct sockaddr *) &ptcp_addr, sizeof(struct sockaddr)) < 0)
+			cerr << "[P] ERROR on binding" << endl;
   }
 
-	while(1){
-    if (manager) {
+	while(true) {
+    if (manager == true) {
 	  	// Envia pacote a procura de participantes acordados
-      send_res = sendto(mng_sock_fd, "Are you awake?\n", 15, 0, (const struct sockaddr *) &ptcp_addr, sizeof(struct sockaddr_in));
+      send_res = sendto(mng_sock_fd, "Are you awake?\n", 15, 0, (const struct sockaddr *) &broadcast_addr, sizeof(struct sockaddr_in));
 		  if (send_res < 0)
-			  printf("ERROR manager sendto");
-      
+			  cerr << ("[M] ERROR sendto") << endl;
+
       // Recebe resposta dos participantes
       // TODO: receber as respostas (que podem vir ao mesmo tempo) em ordem de chegada
       // NENHUMA mensagem deve ser perdida
       recv_res = recvfrom(mng_sock_fd, buffer, 256, 0, (struct sockaddr *) &ptcp_addr, &length);
       if (recv_res < 0)
-        printf("ERROR recvfrom");
+        cerr << "[M] ERROR recvfrom" << endl;
+
+			host_struct = gethostbyaddr(&(ptcp_addr.sin_addr), sizeof(ptcp_addr.sin_addr), AF_INET);
+			if (host_struct == NULL) {
+				cerr << "[M] Couldn't get host name, using IP" << endl;
+				hostname = inet_ntoa(ptcp_addr.sin_addr);
+			}
+			else {
+				hostname = host_struct->h_name;
+			}
+
+			cout << "[M] Participant answered: " << buffer;
+			cout << "[M] Host name: " << hostname << " IP: " << inet_ntoa(ptcp_addr.sin_addr) << endl << endl;
+
+			sleep(1);
     }
     else {
       // Espera mensagem do manager
-		  recv_res = recvfrom(mng_sock_fd, buffer, 256, 0, (struct sockaddr *) &mng_addr, &length);
+		  recv_res = recvfrom(ptcp_sock_fd, buffer, 256, 0, (struct sockaddr *) &mng_addr, &length);
       if (recv_res < 0)
-        printf("ERROR participant recvfrom");
+        cerr << "[P] ERROR recvfrom" << endl;
+			buffer[recv_res] = '\0';
+			cout << "[P] Manager (IP " << inet_ntoa(mng_addr.sin_addr) << ") asked: " << buffer << endl;
 
       // Responde ao manager
-      send_res = sendto(mng_sock_fd, "Yes", 15, 0, (const struct sockaddr *) &mng_addr, sizeof(struct sockaddr_in));
+      send_res = sendto(ptcp_sock_fd, "Yes\n", 4, 0, (const struct sockaddr *) &mng_addr, sizeof(struct sockaddr_in));
 		  if (send_res < 0)
-			  printf("ERROR manager sendto");
-      
+			  cerr << "[P] ERROR sendto" << endl;
+
+			sleep(1);
     }
-		
-		length = sizeof(struct sockaddr_in);
-		printf("Got an ack: %s\n", buffer);
-		printf("Server ip: %s\n", inet_ntoa(from.sin_addr));
-		printf("Server PORT: %d\n", ntohs(from.sin_port));
-
-		server = gethostbyaddr(&(from.sin_addr), sizeof(from.sin_addr), AF_INET);
-		//server = gethostbyname(inet_ntoa(from.sin_addr));
-		if (server == NULL)
-			printf("Couldn't get host name, using: %s\n", inet_ntoa(from.sin_addr));
-		else
-			printf("Server NAME: %s\n", server->h_name);
-
-		// printf("Server ip: %s\n", inet_ntoa(ptcp_addr.sin_addr));
-		// printf("Server PORT: %d\n", ntohs(ptcp_addr.sin_port));
-		sleep(1);
-		n = sendto(mng_sock_fd, "Hello\n", 6, 0, (const struct sockaddr *) &from, sizeof(struct sockaddr_in));
-		if (n < 0) 
-			printf("ERROR sendto");
-		else
-			printf("message sent\n");
-
-		n = recvfrom(mng_sock_fd, buffer, 256, 0, (struct sockaddr *) &from, &length);
-		if (n < 0)
-			printf("ERROR recvfrom");
-		printf("buffer: %s\n", buffer);
-		sleep(2);
 	}
+
 	close(mng_sock_fd);
+	close(ptcp_sock_fd);
 	return 0;
 }
