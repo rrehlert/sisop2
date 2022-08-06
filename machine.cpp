@@ -2,8 +2,8 @@
 #include <iostream>
 #include <string>
 
-#define AWAKEN 1
-#define SLEEPY 0
+#define AWAKE 1
+#define SLEEPING 0
 
 using namespace std;
 
@@ -20,7 +20,7 @@ class Machine {
 		Machine(string IP, string hostname) {
 			host_name = hostname;
 			IP_addr = IP;
-			status = AWAKEN;
+			status = AWAKE;
 		}
 
 		Machine(const Machine& m1) {
@@ -37,12 +37,12 @@ class Machine {
 			status = new_status;
 		}
 
-		void setAwaken() {
-			status = AWAKEN;
+		void setAwake() {
+			status = AWAKE;
 		}
 
-		void setSleepy() {
-			status = SLEEPY;
+		void setSleeping() {
+			status = SLEEPING;
 		}
 
 		string getIP() {
@@ -62,13 +62,13 @@ class Machine {
 		}
 
 		bool isAwaken() {
-			return (status == AWAKEN);
+			return (status == AWAKE);
 		}
 
 		void print() {
 			cout << "::Machine::" << endl;
 			cout << "IP: " << IP_addr << endl;
 			cout << "Hostname: " << host_name << endl;
-			cout << "Status: " << (status == AWAKEN ? "awaken" : "sleepy") << endl;
+			cout << "Status: " << (status == AWAKE ? "awake" : "sleeping") << endl;
 		}
 };
