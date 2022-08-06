@@ -9,6 +9,9 @@
 #include <string>
 #include <iostream>
 #include <time.h>
+#include <map>
+
+#include "machine.cpp"
 
 #define PORT 4000
 #define BROADCAST_IP "255.255.255.255"
@@ -24,6 +27,7 @@ int main(int argc, char *argv[]) {
 	int broadcastPermission = 1;
   bool manager = false;
 	string hostname;
+	map<string, Machine> machines;
 
 	if (argc > 1 && (string)argv[1] == "manager") {
     manager = true;
@@ -71,6 +75,8 @@ int main(int argc, char *argv[]) {
       recv_res = recvfrom(mng_sock_fd, buffer, 256, 0, (struct sockaddr *) &ptcp_addr, &length);
       if (recv_res < 0)
         cerr << "[M] ERROR recvfrom" << endl;
+			else
+				cout << "[M] Participant answered: " << buffer;
 
 			host_struct = gethostbyaddr(&(ptcp_addr.sin_addr), sizeof(ptcp_addr.sin_addr), AF_INET);
 			if (host_struct == NULL) {
@@ -81,10 +87,23 @@ int main(int argc, char *argv[]) {
 				hostname = host_struct->h_name;
 			}
 
-			cout << "[M] Participant answered: " << buffer;
-			cout << "[M] Host name: " << hostname << " IP: " << inet_ntoa(ptcp_addr.sin_addr) << endl << endl;
+			Machine mach(inet_ntoa(ptcp_addr.sin_addr), hostname);
 
-			sleep(1);
+			if ( machines.count(mach.getIP()) > 0)
+   			cout << "Machine is known \n" << endl;
+			else {
+   			cout << "Machine is unknown! Adding to the map \n" << endl;
+				machines[mach.getIP()] = mach;
+			}
+
+			cout << "** Machines Map **" << endl;
+			for (auto it = machines.begin(); it != machines.end(); ++it) {
+    		cout << it->first << " => " << endl;
+				it->second.print();
+				cout << '\n';
+			}
+
+			sleep(3);
     }
     else {
       // Espera mensagem do manager
