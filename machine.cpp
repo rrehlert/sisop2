@@ -3,7 +3,7 @@
 #include <string>
 
 #define AWAKE 1
-#define SLEEPING 0
+#define ASLEEP 0
 #define MAX_MISSED_CALLS 3
 
 using namespace std;
@@ -45,8 +45,8 @@ class Machine {
 			status = AWAKE;
 		}
 
-		void setSleeping() {
-			status = SLEEPING;
+		void setAsleep() {
+			status = ASLEEP;
 		}
 
 		string getIP() {
@@ -71,8 +71,9 @@ class Machine {
 
 		void increaseMissedCalls() {
 			missed_calls += 1;
+			// TODO: move this check to Monitoring Subservice
 			if (missed_calls >= MAX_MISSED_CALLS)
-				status = SLEEPING;
+				setAsleep();
 		}
 
 		void resetMissedCalls() {
@@ -87,7 +88,7 @@ class Machine {
 			cout << "::Machine::" << '\n';
 			cout << "IP: " << IP_addr << '\n';
 			cout << "Hostname: " << host_name << '\n';
-			cout << "Status: " << (status == AWAKE ? "awake" : "sleeping") << '\n';
+			cout << "Status: " << (status == AWAKE ? "awake" : "asleep") << '\n';
 			cout << "Missed calls: " << missed_calls << endl;
 		}
 };
