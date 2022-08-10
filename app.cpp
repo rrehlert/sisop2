@@ -21,12 +21,34 @@ int main(int argc, char *argv[]) {
     manager = true;
 
   if (manager == true) {
+
+		// Interface Subservice:
+		// - thread mostrando a lista de participantes;
+		// - thread esperando input do usuario
+
+		// Discovery Subservice:
+		// - thread enviando pacotes em modo broadcast;
+		// - (?) thread ouvindo pacotes de exit
+
+		// Monitoring Subservice:
+		// - uma thread para cada participante, perguntando se esta acordado
+
 		cout << "Role: [M]" << endl;
 
 		mng_socket.setBroadcastOpt();
 		mng_socket.setSendAddr(BROADCAST_IP, PORT);
   }
   else {
+
+		// Interface Subservice:
+		// - thread esperando input do usuario
+
+		// Discovery Subservice:
+		// - thread ouvindo pacotes de descoberta
+
+		// Monitoring Subservice:
+		// - thread ouvindo pacotes de status
+
 		cout << "Role: [P]" << endl;
 
 		ptcp_socket.listenPort(PORT);
