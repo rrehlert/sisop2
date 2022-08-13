@@ -12,6 +12,7 @@
 
 #define PORT 4000
 #define BROADCAST_IP "255.255.255.255"
+#define DISCOVERY_BEACON_INTERVAL 3
 
 using namespace std;
 
@@ -41,41 +42,27 @@ void discoverParticipants() {
       // Looking for the machine on the map
       if (MachinesManager::Instance().machineIsKnown(IP_addr)) {
         cout << "[D] Machine is known \n" << endl;
+
         auto machine = MachinesManager::Instance().getMachine(IP_addr);
+        // Set machine to be monitorated again
         if (machine->second.isParticipating() == false) {
           machine->second.setParticipating(true);
+
+          // Monitoring Subservice
           thread (monitorateParticipant, IP_addr).detach();
         }
       }
       else {
         cout << "[D] Machine is unknown! Adding to the map \n" << endl;
         MachinesManager::Instance().createMachine(hostname, IP_addr);
+
+        // Monitoring Subservice
         thread (monitorateParticipant, IP_addr).detach();
       }
     }
 
     MachinesManager::Instance().printMachines();
 
-    sleep(3);
-  }
-}
-
-void listenForDiscovery() {
-  Socket ptcp_socket;
-  int send_res, recv_res;
-
-  ptcp_socket.listenPort(PORT);
-
-  while(true) {
-    // Espera mensagem do manager
-    recv_res = ptcp_socket.receiveMessage(true);
-    if (recv_res < 0)
-      cerr << "[P] ERROR recvfrom" << endl;
-    cout << "[P] Manager (IP " << ptcp_socket.getSenderIP() << ") asked: " << ptcp_socket.getBuffer() << endl;
-
-    // Responde ao manager
-    send_res = ptcp_socket.sendMessageToSender("Yes");
-    if (send_res < 0)
-      cerr << "[P] ERROR sendto" << endl;
+    sleep(DISCOVERY_BEACON_INTERVAL);
   }
 }

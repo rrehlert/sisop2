@@ -10,6 +10,7 @@
 
 #define PORT 4000
 #define MAX_MISSED_CALLS 10
+#define MONITORING_PACKET_INTERVAL 1
 
 using namespace std;
 
@@ -46,26 +47,6 @@ void monitorateParticipant(string IP) {
       }
     }
 
-    sleep(1);
-  }
-}
-
-void listenForMonitoring() {
-  Socket ptcp_socket;
-  int send_res, recv_res;
-
-  ptcp_socket.listenPort(PORT);
-
-  while(true) {
-    // Espera mensagem do manager
-    recv_res = ptcp_socket.receiveMessage(true);
-    if (recv_res < 0)
-      cerr << "[P] ERROR recvfrom" << endl;
-    cout << "[P] Manager (IP " << ptcp_socket.getSenderIP() << ") asked: " << ptcp_socket.getBuffer() << endl;
-
-    // Responde ao manager
-    send_res = ptcp_socket.sendMessageToSender("Yes");
-    if (send_res < 0)
-      cerr << "[P] ERROR sendto" << endl;
+    sleep(MONITORING_PACKET_INTERVAL);
   }
 }
