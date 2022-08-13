@@ -33,12 +33,12 @@ class MachinesManager {
     }
 
     bool machineIsKnown(string IP) {
-      // Enters the critical session
+      // Enters the critical section
       map_mutex.lock();
 
       bool res = (machines.count(IP) > 0);
 
-      // Leaves the critical session
+      // Leaves the critical section
       map_mutex.unlock();
 
       return res;

@@ -32,8 +32,9 @@ void monitorateParticipant(string IP) {
     recv_res = mng_socket.receiveMessage();
     if (recv_res < 0) {
       missed_calls++;
-      cerr << "[M] Participant " << IP << " didn't answer. Missed calls: " << missed_calls << "\n" << endl;
+      cerr << "[M] Participant " << IP << " didn't answer. Missed calls: " << missed_calls << endl;
       if ((awake == true) && (missed_calls >= MAX_MISSED_CALLS)) {
+        cout << "[M] Participant " << IP << " set as ASLEEP" << endl;
         awake = false;
         machine->second.setAsleep();
       }
