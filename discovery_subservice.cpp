@@ -3,11 +3,12 @@
 #include <iostream>
 #include <time.h>
 #include <map>
+#include <thread>
 
 #include "socket.cpp"
 #include "machine.cpp"
-#include "machines_management.cpp"
-#include "monitoring.cpp"
+#include "management_subservice.cpp"
+#include "monitoring_subservice.cpp"
 
 #define PORT 4000
 #define BROADCAST_IP "255.255.255.255"

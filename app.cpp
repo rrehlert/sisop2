@@ -6,7 +6,7 @@
 
 #include "machine.cpp"
 #include "socket.cpp"
-#include "discovery.cpp"
+#include "discovery_subservice.cpp"
 
 #define PORT 4000
 #define BROADCAST_IP "255.255.255.255"
