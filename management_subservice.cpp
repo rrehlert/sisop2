@@ -3,23 +3,23 @@
 #include <iostream>
 #include <time.h>
 #include <map>
+#include <mutex>
 
 #include "machine.cpp"
 
 using namespace std;
+
+static mutex map_mutex;
 
 class MachinesManager {
 
   private:
     map<string, Machine> machines;
 
-    MachinesManager() {
-    // Constructor code goes here.
-    }
-
-    ~MachinesManager() {
-      // Destructor code goes here.
-    }
+    // Constructor and destructor must be private to ensure only one instance of the class
+    // is created.
+    MachinesManager() {}
+    ~MachinesManager() {}
 
   public:
     static MachinesManager& Instance() {
@@ -33,19 +33,39 @@ class MachinesManager {
     }
 
     bool machineIsKnown(string IP) {
-      return (machines.count(IP) > 0);
+      // Enters the critical session
+      map_mutex.lock();
+
+      bool res = (machines.count(IP) > 0);
+
+      // Leaves the critical session
+      map_mutex.unlock();
+
+      return res;
     }
 
     void createMachine(string hostname, string IP) {
       Machine mach(IP, hostname);
+      map_mutex.lock();
+
       machines[IP] = mach;
+
+      map_mutex.unlock();
     }
 
     auto getMachine(string IP) {
-      return machines.find(IP);
+      map_mutex.lock();
+
+      auto res = machines.find(IP);
+
+      map_mutex.unlock();
+
+      return res;
     }
 
     void printMachines(bool only_participating = false) {
+      map_mutex.lock();
+
       cout << "** Machines Map **" << endl;
 			for (auto it = machines.begin(); it != machines.end(); ++it) {
         if (only_participating == false || (only_participating == true && it->second.isParticipating() == true)) {
@@ -54,5 +74,7 @@ class MachinesManager {
           cout << '\n';
         }
 			}
+
+      map_mutex.unlock();
     }
 };
