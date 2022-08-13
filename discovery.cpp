@@ -1,10 +1,12 @@
+#pragma once
 #include <string>
 #include <iostream>
 #include <time.h>
 #include <map>
 
-#include "machine.cpp"
 #include "socket.cpp"
+#include "machine.cpp"
+#include "machines_management.cpp"
 
 #define PORT 4000
 #define BROADCAST_IP "255.255.255.255"
@@ -14,7 +16,6 @@ using namespace std;
 void discoverParticipants() {
   Socket mng_socket;
   int send_res, recv_res;
-  map<string, Machine> machines;
 
   mng_socket.setBroadcastOpt();
 	mng_socket.setSendAddr(BROADCAST_IP, PORT);
@@ -36,22 +37,16 @@ void discoverParticipants() {
       string hostname = mng_socket.getSenderHostname();
 
       // Looking for the machine on the map
-      if ( machines.count(IP_addr) > 0) {
+      if (MachinesManager::Instance().machineIsKnown(IP_addr)) {
         cout << "Machine is known \n" << endl;
       }
       else {
         cout << "Machine is unknown! Adding to the map \n" << endl;
-        Machine mach(IP_addr, hostname);
-        machines[IP_addr] = mach;
+        MachinesManager::Instance().createMachine(hostname, IP_addr);
       }
     }
 
-    cout << "** Machines Map **" << endl;
-    for (auto it = machines.begin(); it != machines.end(); ++it) {
-      cout << it->first << " => " << endl;
-      it->second.print();
-      cout << '\n';
-    }
+    MachinesManager::Instance().printMachines();
 
     sleep(3);
   }
