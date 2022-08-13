@@ -14,8 +14,6 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-	Socket mng_socket, ptcp_socket;
-  int send_res, recv_res;
   bool manager = false;
 
 	if (argc > 1 && (string)argv[1] == "manager")

@@ -84,6 +84,10 @@ class Machine {
 			return (status == AWAKE);
 		}
 
+		bool isAsleep() {
+			return (status == ASLEEP);
+		}
+
 		void print() {
 			cout << "::Machine::" << '\n';
 			cout << "Hostname: " << hostname << '\n';
