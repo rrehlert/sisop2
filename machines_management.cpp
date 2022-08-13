@@ -23,13 +23,13 @@ class MachinesManager {
 
   public:
     static MachinesManager& Instance() {
-    // Since it's a static variable, if the class has already been created,
-    // it won't be created again.
-    // And it **is** thread-safe in C++11.
-    static MachinesManager myInstance;
+      // Since it's a static variable, if the class has already been created,
+      // it won't be created again.
+      // And it **is** thread-safe in C++11.
+      static MachinesManager myInstance;
 
-    // Return a reference to our instance.
-    return myInstance;
+      // Return a reference to our instance.
+      return myInstance;
     }
 
     bool machineIsKnown(string IP) {
