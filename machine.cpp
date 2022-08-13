@@ -11,7 +11,7 @@ using namespace std;
 class Machine {
 
 	private:
-		string host_name;
+		string hostname;
   	string IP_addr;
   	int status;
 		unsigned int missed_calls;
@@ -19,15 +19,15 @@ class Machine {
   public:
 		Machine(){};
 
-		Machine(string IP, string hostname) {
-			host_name = hostname;
+		Machine(string IP, string _hostname) {
+			hostname = _hostname;
 			IP_addr = IP;
 			status = AWAKE;
 			missed_calls = 0;
 		}
 
 		Machine(const Machine& m1) {
-			host_name = m1.host_name;
+			hostname = m1.hostname;
 			IP_addr = m1.IP_addr;
 			status = m1.status;
 			missed_calls = m1.missed_calls;
@@ -58,11 +58,11 @@ class Machine {
 		}
 
 		string getHostname() {
-			return host_name;
+			return hostname;
 		}
 
-		void setHostname(const string new_host_name) {
-			host_name = new_host_name;
+		void setHostname(const string new_hostname) {
+			hostname = new_hostname;
 		}
 
 		unsigned int getMissedCalls() {
@@ -86,8 +86,8 @@ class Machine {
 
 		void print() {
 			cout << "::Machine::" << '\n';
+			cout << "Hostname: " << hostname << '\n';
 			cout << "IP: " << IP_addr << '\n';
-			cout << "Hostname: " << host_name << '\n';
 			cout << "Status: " << (status == AWAKE ? "awake" : "asleep") << '\n';
 			cout << "Missed calls: " << missed_calls << endl;
 		}
