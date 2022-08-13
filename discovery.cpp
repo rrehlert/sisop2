@@ -25,21 +25,21 @@ void discoverParticipants() {
     // Send packet looking for participants
     send_res = mng_socket.sendMessage("Are you here?");
     if (send_res < 0)
-      cerr << ("[M] ERROR sendto") << endl;
+      cerr << ("[D] ERROR sendto") << endl;
 
     recv_res = mng_socket.receiveMessage();
     if (recv_res < 0) {
-      cerr << "[M] Nobody answered \n" << endl;
+      cerr << "[D] Nobody answered \n" << endl;
     }
     else {
-      cout << "[M] Participant answered: " << mng_socket.getBuffer() << endl;
+      cout << "[D] Participant answered: " << mng_socket.getBuffer() << endl;
 
       string IP_addr = mng_socket.getSenderIP();
       string hostname = mng_socket.getSenderHostname();
 
       // Looking for the machine on the map
       if (MachinesManager::Instance().machineIsKnown(IP_addr)) {
-        cout << "Machine is known \n" << endl;
+        cout << "[D] Machine is known \n" << endl;
         auto machine = MachinesManager::Instance().getMachine(IP_addr);
         if (machine->second.isParticipating() == false) {
           machine->second.setParticipating(true);
@@ -47,7 +47,7 @@ void discoverParticipants() {
         }
       }
       else {
-        cout << "Machine is unknown! Adding to the map \n" << endl;
+        cout << "[D] Machine is unknown! Adding to the map \n" << endl;
         MachinesManager::Instance().createMachine(hostname, IP_addr);
         thread (monitorateParticipant, IP_addr).detach();
       }
