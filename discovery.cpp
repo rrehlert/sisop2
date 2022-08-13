@@ -7,6 +7,7 @@
 #include "socket.cpp"
 #include "machine.cpp"
 #include "machines_management.cpp"
+#include "monitoring.cpp"
 
 #define PORT 4000
 #define BROADCAST_IP "255.255.255.255"
@@ -46,6 +47,7 @@ void discoverParticipants() {
       else {
         cout << "Machine is unknown! Adding to the map \n" << endl;
         MachinesManager::Instance().createMachine(hostname, IP_addr);
+        thread (monitorateParticipant, IP_addr).detach();
       }
     }
 
