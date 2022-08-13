@@ -16,11 +16,12 @@ using namespace std;
 void monitorateParticipant(string IP) {
   Socket mng_socket;
   int send_res, recv_res, missed_calls = 0;
+  bool awake = true;
   auto machine = MachinesManager::Instance().getMachine(IP);
 
 	mng_socket.setSendAddr(IP, PORT);
 
-  while(true) {
+  while(machine->second.isParticipating()) {
 
     // Send packet looking for participants
     send_res = mng_socket.sendMessage("Are you awake?");
@@ -29,16 +30,18 @@ void monitorateParticipant(string IP) {
 
     recv_res = mng_socket.receiveMessage();
     if (recv_res < 0) {
-      cerr << "[M] Participant " << IP << " didn't answer \n" << endl;
       missed_calls++;
-      if ((missed_calls >= MAX_MISSED_CALLS) && (machine->second.isAwaken())){ // Teste do isAwaken() aqui ou na :31?
+      cerr << "[M] Participant " << IP << " didn't answer. Missed calls: " << missed_calls << "\n" << endl;
+      if ((awake == true) && (missed_calls >= MAX_MISSED_CALLS)) {
+        awake = false;
         machine->second.setAsleep();
       }
     }
     else {
       cout << "[M] Participant " << IP << " answered: " << mng_socket.getBuffer() << endl;
-      if (machine->second.isAsleep()) {
-        missed_calls = 0;
+      missed_calls = 0;
+      if (awake == false) {
+        awake = true;
         machine->second.setAwake();
       }
     }

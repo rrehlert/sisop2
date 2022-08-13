@@ -41,8 +41,10 @@ void discoverParticipants() {
       if (MachinesManager::Instance().machineIsKnown(IP_addr)) {
         cout << "Machine is known \n" << endl;
         auto machine = MachinesManager::Instance().getMachine(IP_addr);
-        if (machine->second.isParticipating() == false)
+        if (machine->second.isParticipating() == false) {
           machine->second.setParticipating(true);
+          thread (monitorateParticipant, IP_addr).detach();
+        }
       }
       else {
         cout << "Machine is unknown! Adding to the map \n" << endl;
