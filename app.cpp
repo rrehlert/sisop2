@@ -35,6 +35,7 @@ int main(int argc, char *argv[]) {
 		cout << "Role: [M]" << endl;
 
 		thread (discoverParticipants).detach();
+		//-----------> monitorateParticipant() pra cada participante aqui <------------
   }
   else {
 
@@ -50,6 +51,9 @@ int main(int argc, char *argv[]) {
 		cout << "Role: [P]" << endl;
 
 		thread (listenForDiscovery).detach();
+			// e se existir um unico metodo que responde `sim` pra 
+			// discovery e monitoring, ou seja, pra tudo o que o ptcp escutar?
+			// onde colocar esse metodo?
 		
   }
 

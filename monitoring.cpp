@@ -31,13 +31,14 @@ void monitorateParticipant(string IP) {
     if (recv_res < 0) {
       cerr << "[M] Participant " << IP << " didn't answer \n" << endl;
       missed_calls++;
-      if (missed_calls >= MAX_MISSED_CALLS) {
+      if ((missed_calls >= MAX_MISSED_CALLS) && (machine->second.isAwaken())){ // Teste do isAwaken() aqui ou na :31?
         machine->second.setAsleep();
       }
     }
     else {
       cout << "[M] Participant " << IP << " answered: " << mng_socket.getBuffer() << endl;
       if (machine->second.isAsleep()) {
+        missed_calls = 0;
         machine->second.setAwake();
       }
     }
