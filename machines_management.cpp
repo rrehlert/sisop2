@@ -45,17 +45,14 @@ class MachinesManager {
       return machines.find(IP);
     }
 
-    void increaseMissedCalls() {
-      for (auto it = machines.begin(); it != machines.end(); ++it)
-				it->second.increaseMissedCalls();
-    }
-
-    void printMachines() {
+    void printMachines(bool only_participating = false) {
       cout << "** Machines Map **" << endl;
 			for (auto it = machines.begin(); it != machines.end(); ++it) {
-				cout << it->first << " => " << endl;
-				it->second.print();
-				cout << '\n';
+        if (only_participating == false || (only_participating == true && it->second.isParticipating() == true)) {
+          cout << it->first << " => " << endl;
+          it->second.print();
+          cout << '\n';
+        }
 			}
     }
 };

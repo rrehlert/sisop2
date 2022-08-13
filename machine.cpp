@@ -4,7 +4,6 @@
 
 #define AWAKE 1
 #define ASLEEP 0
-#define MAX_MISSED_CALLS 3
 
 using namespace std;
 
@@ -14,7 +13,7 @@ class Machine {
 		string hostname;
   	string IP_addr;
   	int status;
-		unsigned int missed_calls;
+		bool participating;
 
   public:
 		Machine(){};
@@ -23,14 +22,14 @@ class Machine {
 			hostname = _hostname;
 			IP_addr = IP;
 			status = AWAKE;
-			missed_calls = 0;
+			participating = true;
 		}
 
 		Machine(const Machine& m1) {
 			hostname = m1.hostname;
 			IP_addr = m1.IP_addr;
 			status = m1.status;
-			missed_calls = m1.missed_calls;
+			participating = m1.participating;
 		}
 
 		int getStatus() {
@@ -65,22 +64,7 @@ class Machine {
 			hostname = new_hostname;
 		}
 
-		unsigned int getMissedCalls() {
-			return missed_calls;
-		}
-
-		void increaseMissedCalls() {
-			missed_calls += 1;
-			// TODO: move this check to Monitoring Subservice
-			if (missed_calls >= MAX_MISSED_CALLS)
-				setAsleep();
-		}
-
-		void resetMissedCalls() {
-			missed_calls = 0;
-		}
-
-		bool isAwaken() {
+		bool isAwake() {
 			return (status == AWAKE);
 		}
 
@@ -88,11 +72,19 @@ class Machine {
 			return (status == ASLEEP);
 		}
 
+		bool isParticipating() {
+			return participating;
+		}
+
+		void setParticipating(bool new_status) {
+			participating = new_status;
+		}
+
 		void print() {
 			cout << "::Machine::" << '\n';
 			cout << "Hostname: " << hostname << '\n';
 			cout << "IP: " << IP_addr << '\n';
 			cout << "Status: " << (status == AWAKE ? "awake" : "asleep") << '\n';
-			cout << "Missed calls: " << missed_calls << endl;
+			cout << "Participating: " << (participating == true ? "true" : "false") << endl;
 		}
 };
