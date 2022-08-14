@@ -41,10 +41,14 @@ string exec(string command) {
 string getMacAddress(){
   string command; 
   string mac;
+
+  //Execute terminal command to get ethernet informantion
   command = exec("ip a | grep -A1 enp");
   if(command.length() == 0)
     command = exec("ip a | grep -A1 eth0");
   int pos = command.find("link/ether");
+
+  //Scan for mac address
   mac = command.substr(pos+11, 17);
   return mac;
 }
@@ -70,22 +74,10 @@ void listenForServicePackets() {
   }
 }
 
-void listenForMagicPacket(){
-  Socket ptcp_socket;
-  int send_res, recv_res;
-  string mac_addr = getMacAddress();
-
-  ptcp_socket.listenPort(MAGIC_PORT);
-
-  while(true) {
-    recv_res = ptcp_socket.receiveMessage(true);
-  }
-}
-
 void sendExitPacket(){
   Socket exit_socket;
   exit_socket.setSendAddr(manager_ip, EXIT_PORT);
-
+  //Send exit message to specified exit port
   int exit_message = exit_socket.sendMessage("sleep service exit");
 
 }
