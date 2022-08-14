@@ -103,11 +103,10 @@ class Machine {
 		}
 
 		void print() {
-			cout << "::Machine::" << '\n';
-			cout << "Hostname: " << hostname << '\n';
-			cout << "IP: " << IP_addr << '\n';
-			cout << "Mac Address: " << mac_addr << '\n';
-			cout << "Status: " << (status == AWAKE ? "awake" : "asleep") << '\n';
-			cout << "Participating: " << (participating == true ? "true" : "false") << endl;
+			cout.width(25); cout << left << hostname;
+			cout.width(15); cout << left << IP_addr;
+			cout.width(21); cout << left << mac_addr;
+			cout.width(11); cout << left << (status == AWAKE ? "awake" : "asleep");
+			cout.width(13); cout << left << (participating == true ? "true" : "false") << endl;
 		}
 };

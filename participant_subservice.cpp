@@ -30,13 +30,22 @@ void listenForServicePackets() {
     recv_res = ptcp_socket.receiveMessage(true);
     if (recv_res < 0)
       cerr << "[P] ERROR recvfrom" << endl;
-    cout << "[P] Manager (IP " << ptcp_socket.getSenderIP() << " ) asked: " << ptcp_socket.getBuffer() << endl;
+    // cout << "[P] Manager (IP " << ptcp_socket.getSenderIP() << " ) asked: " << ptcp_socket.getBuffer() << endl;
     
     //Get manager infos
     manager_ip = ptcp_socket.getSenderIP();
     string buffer = ptcp_socket.getBuffer();
     string manager_mac =  buffer.substr(0,17);
     string manager_hostname = buffer.substr(17);
+    system("clear");
+    cout << "Role: [P]" << endl;
+    cout << "Latest manager info:" << endl;
+    cout.width(25); cout << left << "hostname";
+		cout.width(15); cout << left << "IP";
+		cout.width(21); cout << left << "Mac" << endl;
+    cout.width(25); cout << left << manager_hostname;
+		cout.width(15); cout << left << manager_ip;
+		cout.width(21); cout << left << manager_mac << endl;
 
 
     // Answers the packet received
@@ -51,5 +60,4 @@ void sendExitPacket(){
   exit_socket.setSendAddr(manager_ip, EXIT_PORT);
   //Send exit message to specified exit port
   int exit_message = exit_socket.sendMessage("sleep service exit");
-
 }

@@ -37,19 +37,21 @@ void monitorateParticipant(string IP) {
     recv_res = mng_socket.receiveMessage();
     if (recv_res < 0) {
       missed_calls++;
-      cerr << "[M] Participant " << IP << " didn't answer. Missed calls: " << missed_calls << endl;
+      // cerr << "[M] Participant " << IP << " didn't answer. Missed calls: " << missed_calls << endl;
       if ((awake == true) && (missed_calls >= MAX_MISSED_CALLS)) {
-        cout << "[M] Participant " << IP << " set as ASLEEP" << endl;
+        // cout << "[M] Participant " << IP << " set as ASLEEP" << endl;
         awake = false;
         machine->second.setAsleep();
+        MachinesManager::Instance().printMachines();
       }
     }
     else {
-      cout << "[M] Participant " << IP << " answered: " << mng_socket.getBuffer() << endl;
+      // cout << "[M] Participant " << IP << " answered: " << mng_socket.getBuffer() << endl;
       missed_calls = 0;
       if (awake == false) {
         awake = true;
         machine->second.setAwake();
+        MachinesManager::Instance().printMachines();
       }
     }
 
@@ -69,10 +71,10 @@ void exitListener(){
     recv_res = exit_socket.receiveMessage(true);
     if (recv_res < 0)
       cerr << "[M] ERROR recvfrom" << endl;
-    cout << "[M] Participant (IP " << exit_socket.getSenderIP() << " ) asked: " << exit_socket.getBuffer() << endl;
+    // cout << "[M] Participant (IP " << exit_socket.getSenderIP() << " ) asked: " << exit_socket.getBuffer() << endl;
     participant_ip = exit_socket.getSenderIP();
     MachinesManager::Instance().removeMachine(participant_ip);
-    cout << participant_ip << " Machine exited the service" << endl;
+    // cout << participant_ip << " Machine exited the service" << endl;
 
     MachinesManager::Instance().printMachines();
 

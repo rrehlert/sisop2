@@ -49,7 +49,6 @@ class MachinesManager {
       map_mutex.lock();
 
       machines[IP] = mach;
-
       map_mutex.unlock();
     }
 
@@ -75,7 +74,6 @@ class MachinesManager {
 
     void removeMachine(string IP){
       map_mutex.lock();
-      
       auto it = machines.find(IP);
       it->second.setParticipating(false);
       it->second.restoreCount();
@@ -85,16 +83,25 @@ class MachinesManager {
 
     void printMachines(bool only_participating = false) {
       map_mutex.lock();
-
-      cout << "** Machines Map **" << endl;
+      system("clear");
+      cout << "Role: [M]" << endl;
+      cout << "Participants:" << endl;
+      printHeader();
 			for (auto it = machines.begin(); it != machines.end(); ++it) {
         if (only_participating == false || (only_participating == true && it->second.isParticipating() == true)) {
-          cout << it->first << " => " << endl;
           it->second.print();
           cout << '\n';
         }
 			}
 
       map_mutex.unlock();
+    }
+
+    void printHeader(){
+      cout.width(25); cout << left << "Hostname";
+      cout.width(15); cout << left << "IP";
+      cout.width(21); cout << left << "Mac";
+      cout.width(11); cout << left << "Status";
+      cout.width(13); cout << left << "Participating" << endl;
     }
 };

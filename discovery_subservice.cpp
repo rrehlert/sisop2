@@ -37,10 +37,10 @@ void discoverParticipants() {
 
     recv_res = mng_socket.receiveMessage();
     if (recv_res < 0) {
-      cerr << "[D] Nobody answered \n" << endl;
+      // cerr << "[D] Nobody answered \n" << endl;
     }
     else {
-      cout << "[D] Participant answered: " << mng_socket.getBuffer() << endl;
+      // cout << "[D] Participant answered: " << mng_socket.getBuffer() << endl;
 
       string IP_addr = mng_socket.getSenderIP();
       //string hostname = mng_socket.getSenderHostname();
@@ -52,14 +52,15 @@ void discoverParticipants() {
 
       // Looking for the machine on the map
       if (MachinesManager::Instance().machineIsKnown(IP_addr)) {
-        cout << "[D] Machine is known \n" << endl;
+        // cout << "[D] Machine is known \n" << endl;
 
         auto machine = MachinesManager::Instance().getMachine(IP_addr);
         // Set machine to be monitorated again
         if (machine->second.isParticipating() == false) {
           if (machine->second.getCount() >= 2){
-            cout << "[D] Machine " << IP_addr << " is being monitorated again" << endl;
+            // cout << "[D] Machine " << IP_addr << " is being monitorated again" << endl;
             machine->second.setParticipating(true);
+            MachinesManager::Instance().printMachines();
             // Monitoring Subservice
             thread (monitorateParticipant, IP_addr).detach();
           }
@@ -69,15 +70,15 @@ void discoverParticipants() {
         }
       }
       else {
-        cout << "[D] Machine is unknown! Adding to the map \n" << endl;
+        // cout << "[D] Machine is unknown! Adding to the map \n" << endl;
         MachinesManager::Instance().createMachine(IP_addr, mac_addr, hostname);
+        MachinesManager::Instance().printMachines();
 
         // Monitoring Subservice
         thread (monitorateParticipant, IP_addr).detach();
       }
     }
 
-    MachinesManager::Instance().printMachines();
 
     sleep(DISCOVERY_BEACON_INTERVAL);
   }

@@ -8,7 +8,8 @@
 #include "socket.cpp"
 #include "discovery_subservice.cpp"
 #include "participant_subservice.cpp"
-#include "terminal_subservice.cpp"
+#include "interface_subservice.cpp"
+#include "management_subservice.cpp"
 
 #define PORT 4000
 #define BROADCAST_IP "255.255.255.255"
@@ -35,8 +36,9 @@ int main(int argc, char *argv[]) {
 
 		// Monitoring Subservice:
 		// [x] uma thread para cada participante, perguntando se esta acordado
-
+		system("clear");
 		cout << "Role: [M]" << endl;
+    cout << "No participants found yet" << endl;
 
 		// Discovery Subservice
 		thread (discoverParticipants).detach();
@@ -55,7 +57,9 @@ int main(int argc, char *argv[]) {
 		// Discovery/Monitoring Subservice:
 		// [x] thread ouvindo pacotes de descoberta e pacotes de status
 
-		cout << "Role: [P]" << endl;
+		system("clear");
+  	cout << "Role: [P]" << endl;
+  	cout << "No manager found yet" << endl;
 
 		// Participant Subservice
 		thread (listenForServicePackets).detach();
