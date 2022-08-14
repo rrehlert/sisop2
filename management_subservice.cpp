@@ -44,8 +44,8 @@ class MachinesManager {
       return res;
     }
 
-    void createMachine(string hostname, string IP) {
-      Machine mach(IP, hostname);
+    void createMachine(string IP, string mac, string hostname) {
+      Machine mach(IP, mac, hostname);
       map_mutex.lock();
 
       machines[IP] = mach;

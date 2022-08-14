@@ -60,6 +60,10 @@ int main(int argc, char *argv[]) {
 		// Participant Subservice
 		thread (listenForServicePackets).detach();
 
+		// Magic Packet Subservice (ACHO QUE NÃO PRECISA DE LISTENER)
+		//thread (listenForMagicPacket).detach();
+
+
 		// CLI Subservice
 		thread (read_CLI).detach();
   }

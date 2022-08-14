@@ -12,6 +12,7 @@ class Machine {
 	private:
 		string hostname;
   	string IP_addr;
+	string mac_addr;
   	int status;
 	int participating_count;
 		bool participating;
@@ -19,9 +20,10 @@ class Machine {
   public:
 		Machine(){};
 
-		Machine(string IP, string _hostname) {
+		Machine(string IP, string mac, string _hostname) {
 			hostname = _hostname;
 			IP_addr = IP;
+			mac_addr = mac;
 			status = AWAKE;
 			participating_count = 0;
 			participating = false;
@@ -30,6 +32,7 @@ class Machine {
 		Machine(const Machine& m1) {
 			hostname = m1.hostname;
 			IP_addr = m1.IP_addr;
+			mac_addr = m1.mac_addr;
 			status = m1.status;
 			participating_count = m1.participating_count;
 			participating = m1.participating;
@@ -61,6 +64,10 @@ class Machine {
 
 		void setAsleep() {
 			status = ASLEEP;
+		}
+
+		string getMac(){
+			return mac_addr;
 		}
 
 		string getIP() {
@@ -99,6 +106,7 @@ class Machine {
 			cout << "::Machine::" << '\n';
 			cout << "Hostname: " << hostname << '\n';
 			cout << "IP: " << IP_addr << '\n';
+			cout << "Mac Address: " << mac_addr << '\n';
 			cout << "Status: " << (status == AWAKE ? "awake" : "asleep") << '\n';
 			cout << "Participating: " << (participating == true ? "true" : "false") << endl;
 		}

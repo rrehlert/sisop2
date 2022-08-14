@@ -3,6 +3,7 @@
 #include <string.h>
 #include <signal.h>
 #include "participant_subservice.cpp"
+#include "wakeup_subservice.cpp"
 
 using namespace std;
 
@@ -32,9 +33,9 @@ void read_CLI(){
             sendExitPacket();
             exit(0);
         }
-        if ((command.compare("WAKEUP") == 0)){
+        if ((command.compare("WAKEUP") == 0 && manager == true)){
             cin >> command;
-            cout << "READ CLI: waking up: " << command << endl;
+            wakeupParticipant(command);
         }
     }
 }

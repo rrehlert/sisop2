@@ -1,19 +1,59 @@
 #pragma once
 #include <iostream>
+#include <errno.h>
+#include <string.h>
+#include <fcntl.h>
+#include <net/if.h>
+#include <stdlib.h>
 
 #include "socket.cpp"
 
 #define PORT 4000
 #define EXIT_PORT 4001
+#define MAGIC_PORT 9
 
 using namespace std;
 
 string manager_ip;
 
+string exec(string command) {
+   char buffer[128];
+   string result = "";
+
+   // Open pipe to file
+   FILE* pipe = popen(command.c_str(), "r");
+   if (!pipe) {
+      return "popen failed!";
+   }
+
+   // read till end of process:
+   while (!feof(pipe)) {
+
+      // use buffer to read and add to result
+      if (fgets(buffer, 128, pipe) != NULL)
+         result += buffer;
+   }
+
+   pclose(pipe);
+   return result;
+}
+
+string getMacAddress(){
+  string command; 
+  string mac;
+  command = exec("ip a | grep -A1 enp");
+  if(command.length() == 0)
+    command = exec("ip a | grep -A1 eth0");
+  int pos = command.find("link/ether");
+  mac = command.substr(pos+11, 17);
+  return mac;
+}
+
 void listenForServicePackets() {
   Socket ptcp_socket;
   int send_res, recv_res;
-   
+  string mac_addr = getMacAddress();
+
   ptcp_socket.listenPort(PORT);
 
   while(true) {
@@ -24,10 +64,21 @@ void listenForServicePackets() {
     cout << "[P] Manager (IP " << ptcp_socket.getSenderIP() << " ) asked: " << ptcp_socket.getBuffer() << endl;
     manager_ip = ptcp_socket.getSenderIP();
     // Answers the packet received
-    send_res = ptcp_socket.sendMessageToSender("Yes");
-    cout << "Message Sent" << endl;
+    send_res = ptcp_socket.sendMessageToSender(mac_addr);
     if (send_res < 0)
       cerr << "[P] ERROR sendto" << endl;
+  }
+}
+
+void listenForMagicPacket(){
+  Socket ptcp_socket;
+  int send_res, recv_res;
+  string mac_addr = getMacAddress();
+
+  ptcp_socket.listenPort(MAGIC_PORT);
+
+  while(true) {
+    recv_res = ptcp_socket.receiveMessage(true);
   }
 }
 

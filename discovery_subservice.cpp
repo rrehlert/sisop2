@@ -38,6 +38,7 @@ void discoverParticipants() {
 
       string IP_addr = mng_socket.getSenderIP();
       string hostname = mng_socket.getSenderHostname();
+      string mac_addr = mng_socket.getBuffer();
 
       // Looking for the machine on the map
       if (MachinesManager::Instance().machineIsKnown(IP_addr)) {
@@ -59,7 +60,7 @@ void discoverParticipants() {
       }
       else {
         cout << "[D] Machine is unknown! Adding to the map \n" << endl;
-        MachinesManager::Instance().createMachine(hostname, IP_addr);
+        MachinesManager::Instance().createMachine(IP_addr, mac_addr, hostname);
 
         // Monitoring Subservice
         thread (monitorateParticipant, IP_addr).detach();
