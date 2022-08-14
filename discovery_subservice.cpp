@@ -9,6 +9,7 @@
 #include "machine.cpp"
 #include "management_subservice.cpp"
 #include "monitoring_subservice.cpp"
+#include "information_subservice.cpp"
 
 #define PORT 4000
 #define BROADCAST_IP "255.255.255.255"
@@ -20,12 +21,17 @@ void discoverParticipants() {
   Socket mng_socket;
   int send_res, recv_res;
 
+  string mac_addr = getMacAddress();
+  string hostname = getSelfHostname();
+
   mng_socket.setBroadcastOpt();
 	mng_socket.setSendAddr(BROADCAST_IP, PORT);
 
+
+
   while(true) {
     // Send packet looking for participants
-    send_res = mng_socket.sendMessage("Are you here?");
+    send_res = mng_socket.sendMessage(mac_addr + hostname);
     if (send_res < 0)
       cerr << ("[D] ERROR sendto") << endl;
 
@@ -37,8 +43,12 @@ void discoverParticipants() {
       cout << "[D] Participant answered: " << mng_socket.getBuffer() << endl;
 
       string IP_addr = mng_socket.getSenderIP();
-      string hostname = mng_socket.getSenderHostname();
-      string mac_addr = mng_socket.getBuffer();
+      //string hostname = mng_socket.getSenderHostname();
+      string buffer = mng_socket.getBuffer();
+      string mac_addr =  buffer.substr(0,17);
+      string hostname = buffer.substr(17);
+      if (hostname.compare("") == 0)
+        hostname = IP_addr;
 
       // Looking for the machine on the map
       if (MachinesManager::Instance().machineIsKnown(IP_addr)) {

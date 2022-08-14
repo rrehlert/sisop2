@@ -7,6 +7,7 @@
 #include "socket.cpp"
 #include "machine.cpp"
 #include "management_subservice.cpp"
+#include "information_subservice.cpp"
 
 #define PORT 4000
 #define EXIT_PORT 4001
@@ -20,13 +21,16 @@ void monitorateParticipant(string IP) {
   int send_res, recv_res, missed_calls = 0;
   bool awake = true;
   auto machine = MachinesManager::Instance().getMachine(IP);
+  string mac_addr = getMacAddress();
+  string hostname = getSelfHostname();
+
 
 	mng_socket.setSendAddr(IP, PORT);
 
   while(machine->second.isParticipating()) {
 
     // Send packet looking for participants
-    send_res = mng_socket.sendMessage("Are you awake?");
+    send_res = mng_socket.sendMessage(mac_addr + hostname);
     if (send_res < 0)
       cerr << ("[M] ERROR sendto") << endl;
 

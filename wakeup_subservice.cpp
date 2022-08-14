@@ -78,15 +78,19 @@ void sendMagicPacket(string mac){
         }
 
     // Send the packet out. 
-    cout << message << endl;
-    cout << "Message Length " << message.length() << endl;
     send_res = magic_socket.sendMessage(message);
     if (send_res < 0)
-        cerr << "Error sending message" << endl;
+        cerr << "Error waking up" << endl;
 }
 
 void wakeupParticipant(string IP){ //Could change to hostname
     auto it = MachinesManager::Instance().getMachine(IP);
-    string mac_addr = it->second.getMac();
-    sendMagicPacket(mac_addr);
+    if (it->second.isParticipating()){
+        string mac_addr = it->second.getMac();
+        cout << "Waking up machine: " << IP << endl;
+        sendMagicPacket(mac_addr);
+    }
+    else
+        cout << "Machine " << IP << " not participating" << endl;
 }
+

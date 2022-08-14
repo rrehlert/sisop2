@@ -53,6 +53,16 @@ class MachinesManager {
       map_mutex.unlock();
     }
 
+    auto getMachineByHostname(string hostname) {
+      map_mutex.lock();
+
+      auto res = machines.find(hostname);
+
+      map_mutex.unlock();
+
+      return res;
+    }
+
     auto getMachine(string IP) {
       map_mutex.lock();
 

@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "socket.cpp"
+#include "information_subservice.cpp"
 
 #define PORT 4000
 #define EXIT_PORT 4001
@@ -14,49 +15,13 @@
 
 using namespace std;
 
-string manager_ip;
-
-string exec(string command) {
-   char buffer[128];
-   string result = "";
-
-   // Open pipe to file
-   FILE* pipe = popen(command.c_str(), "r");
-   if (!pipe) {
-      return "popen failed!";
-   }
-
-   // read till end of process:
-   while (!feof(pipe)) {
-
-      // use buffer to read and add to result
-      if (fgets(buffer, 128, pipe) != NULL)
-         result += buffer;
-   }
-
-   pclose(pipe);
-   return result;
-}
-
-string getMacAddress(){
-  string command; 
-  string mac;
-
-  //Execute terminal command to get ethernet informantion
-  command = exec("ip a | grep -A1 enp");
-  if(command.length() == 0)
-    command = exec("ip a | grep -A1 eth0");
-  int pos = command.find("link/ether");
-
-  //Scan for mac address
-  mac = command.substr(pos+11, 17);
-  return mac;
-}
+string manager_ip, manager_mac, manager_hostname;
 
 void listenForServicePackets() {
   Socket ptcp_socket;
   int send_res, recv_res;
   string mac_addr = getMacAddress();
+  string hostname = getSelfHostname();
 
   ptcp_socket.listenPort(PORT);
 
@@ -66,9 +31,16 @@ void listenForServicePackets() {
     if (recv_res < 0)
       cerr << "[P] ERROR recvfrom" << endl;
     cout << "[P] Manager (IP " << ptcp_socket.getSenderIP() << " ) asked: " << ptcp_socket.getBuffer() << endl;
+    
+    //Get manager infos
     manager_ip = ptcp_socket.getSenderIP();
+    string buffer = ptcp_socket.getBuffer();
+    string manager_mac =  buffer.substr(0,17);
+    string manager_hostname = buffer.substr(17);
+
+
     // Answers the packet received
-    send_res = ptcp_socket.sendMessageToSender(mac_addr);
+    send_res = ptcp_socket.sendMessageToSender(mac_addr + hostname);
     if (send_res < 0)
       cerr << "[P] ERROR sendto" << endl;
   }
