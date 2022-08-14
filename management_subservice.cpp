@@ -63,6 +63,16 @@ class MachinesManager {
       return res;
     }
 
+    void removeMachine(string IP){
+      map_mutex.lock();
+      
+      auto it = machines.find(IP);
+      it->second.setParticipating(false);
+      it->second.restoreCount();
+
+      map_mutex.unlock();
+    }
+
     void printMachines(bool only_participating = false) {
       map_mutex.lock();
 

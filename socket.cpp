@@ -61,6 +61,11 @@ class Socket {
       return inet_ntoa(sender_addr.sin_addr);
     }
 
+    //
+    uint16_t getSenderPort() {
+      return ntohs(sender_addr.sin_port);
+    }
+
     // Sets the address to be used as destination of sendMessage().
     void setSendAddr(string IP, int port) {
       send_addr.sin_family = AF_INET;

@@ -13,6 +13,7 @@ class Machine {
 		string hostname;
   	string IP_addr;
   	int status;
+	int participating_count;
 		bool participating;
 
   public:
@@ -22,18 +23,32 @@ class Machine {
 			hostname = _hostname;
 			IP_addr = IP;
 			status = AWAKE;
-			participating = true;
+			participating_count = 0;
+			participating = false;
 		}
 
 		Machine(const Machine& m1) {
 			hostname = m1.hostname;
 			IP_addr = m1.IP_addr;
 			status = m1.status;
+			participating_count = m1.participating_count;
 			participating = m1.participating;
+		}
+
+		int getCount() {
+			return participating_count;
 		}
 
 		int getStatus() {
 			return status;
+		}
+
+		void restoreCount(){
+			participating_count = 0;
+		}
+
+		void incrementCount(){
+			participating_count ++;
 		}
 
 		void setStatus(const int new_status) {

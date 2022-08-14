@@ -9,6 +9,7 @@
 #include "management_subservice.cpp"
 
 #define PORT 4000
+#define EXIT_PORT 4001
 #define MAX_MISSED_CALLS 10
 #define MONITORING_PACKET_INTERVAL 1
 
@@ -50,4 +51,27 @@ void monitorateParticipant(string IP) {
 
     sleep(MONITORING_PACKET_INTERVAL);
   }
+}
+
+void exitListener(){
+  Socket exit_socket;
+  int send_res, recv_res;
+  string participant_ip;
+
+  exit_socket.listenPort(EXIT_PORT);
+
+    while(true) {
+    // Listen for packets sent by the manager to PORT
+    recv_res = exit_socket.receiveMessage(true);
+    if (recv_res < 0)
+      cerr << "[M] ERROR recvfrom" << endl;
+    cout << "[M] Participant (IP " << exit_socket.getSenderIP() << " ) asked: " << exit_socket.getBuffer() << endl;
+    participant_ip = exit_socket.getSenderIP();
+    MachinesManager::Instance().removeMachine(participant_ip);
+    cout << participant_ip << " Machine exited the service" << endl;
+
+    MachinesManager::Instance().printMachines();
+
+  }
+
 }

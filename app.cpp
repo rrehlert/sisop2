@@ -8,14 +8,17 @@
 #include "socket.cpp"
 #include "discovery_subservice.cpp"
 #include "participant_subservice.cpp"
+#include "terminal_subservice.cpp"
 
 #define PORT 4000
 #define BROADCAST_IP "255.255.255.255"
 
 using namespace std;
 
+bool manager = false;
+
 int main(int argc, char *argv[]) {
-  bool manager = false;
+  
 
 	if (argc > 1 && (string)argv[1] == "manager")
     manager = true;
@@ -37,6 +40,12 @@ int main(int argc, char *argv[]) {
 
 		// Discovery Subservice
 		thread (discoverParticipants).detach();
+		
+		//
+		thread (exitListener).detach();
+
+		// CLI Subservice
+		thread (read_CLI).detach();
   }
   else {
 
@@ -50,6 +59,9 @@ int main(int argc, char *argv[]) {
 
 		// Participant Subservice
 		thread (listenForServicePackets).detach();
+
+		// CLI Subservice
+		thread (read_CLI).detach();
   }
 
 	while(true) {};

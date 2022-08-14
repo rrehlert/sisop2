@@ -46,10 +46,15 @@ void discoverParticipants() {
         auto machine = MachinesManager::Instance().getMachine(IP_addr);
         // Set machine to be monitorated again
         if (machine->second.isParticipating() == false) {
-          machine->second.setParticipating(true);
-
-          // Monitoring Subservice
-          thread (monitorateParticipant, IP_addr).detach();
+          if (machine->second.getCount() >= 2){
+            cout << "[D] Machine " << IP_addr << " is being monitorated again" << endl;
+            machine->second.setParticipating(true);
+            // Monitoring Subservice
+            thread (monitorateParticipant, IP_addr).detach();
+          }
+          else{
+            machine->second.incrementCount();
+          }
         }
       }
       else {
