@@ -15,6 +15,7 @@ class MachinesManager {
 
   private:
     map<string, Machine> machines;
+    bool map_changed = false;
 
     // Constructor and destructor must be private to ensure only one instance of the class
     // is created.
@@ -30,6 +31,20 @@ class MachinesManager {
 
       // Return a reference to our instance.
       return myInstance;
+    }
+
+    void setMapChanged(bool new_status) {
+      map_mutex.lock();
+      map_changed = new_status;
+      map_mutex.unlock();
+    }
+
+    bool mapChanged() {
+      map_mutex.lock();
+      bool res = map_changed;
+      map_mutex.unlock();
+
+      return res;
     }
 
     bool machineIsKnown(string IP) {
@@ -90,7 +105,6 @@ class MachinesManager {
 			for (auto it = machines.begin(); it != machines.end(); ++it) {
         if (only_participating == false || (only_participating == true && it->second.isParticipating() == true)) {
           it->second.print();
-          cout << '\n';
         }
 			}
 
