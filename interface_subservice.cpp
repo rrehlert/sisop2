@@ -30,6 +30,7 @@ void read_CLI(){
         }
 
         if ((command.compare("EXIT") == 0 && manager == false)){
+            cout << " Handling EXIT" << endl;
             sendExitPacket();
             exit(0);
         }
