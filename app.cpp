@@ -19,23 +19,11 @@ using namespace std;
 bool manager = false;
 
 int main(int argc, char *argv[]) {
-  
 
 	if (argc > 1 && (string)argv[1] == "manager")
     manager = true;
 
   if (manager == true) {
-
-		// Interface Subservice:
-		// [ ] thread mostrando a lista de participantes;
-		// [ ] thread esperando input do usuario
-
-		// Discovery Subservice:
-		// [x] thread enviando pacotes em modo broadcast;
-		// [ ] (?) thread ouvindo pacotes de exit
-
-		// Monitoring Subservice:
-		// [x] uma thread para cada participante, perguntando se esta acordado
 		system("clear");
 		cout << "Role: [M]" << endl;
     cout << "No participants found yet" << endl;
@@ -48,15 +36,10 @@ int main(int argc, char *argv[]) {
 
 		// CLI Subservice
 		thread (read_CLI).detach();
+
+		thread (updateInterface).detach();
   }
   else {
-
-		// Interface Subservice:
-		// [ ] thread esperando input do usuario
-
-		// Discovery/Monitoring Subservice:
-		// [x] thread ouvindo pacotes de descoberta e pacotes de status
-
 		system("clear");
   	cout << "Role: [P]" << endl;
   	cout << "No manager found yet" << endl;

@@ -27,8 +27,6 @@ void discoverParticipants() {
   mng_socket.setBroadcastOpt();
 	mng_socket.setSendAddr(BROADCAST_IP, PORT);
 
-
-
   while(true) {
     // Send packet looking for participants
     send_res = mng_socket.sendMessage(mac_addr + hostname);
@@ -60,7 +58,7 @@ void discoverParticipants() {
           if (machine->second.getCount() >= 2){
             // cout << "[D] Machine " << IP_addr << " is being monitorated again" << endl;
             machine->second.setParticipating(true);
-            MachinesManager::Instance().printMachines();
+            MachinesManager::Instance().setMapChanged(true);
             // Monitoring Subservice
             thread (monitorateParticipant, IP_addr).detach();
           }
@@ -72,13 +70,12 @@ void discoverParticipants() {
       else {
         // cout << "[D] Machine is unknown! Adding to the map \n" << endl;
         MachinesManager::Instance().createMachine(IP_addr, mac_addr, hostname);
-        MachinesManager::Instance().printMachines();
+        MachinesManager::Instance().setMapChanged(true);
 
         // Monitoring Subservice
         thread (monitorateParticipant, IP_addr).detach();
       }
     }
-
 
     sleep(DISCOVERY_BEACON_INTERVAL);
   }

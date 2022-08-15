@@ -2,8 +2,13 @@
 #include <iostream>
 #include <string.h>
 #include <signal.h>
+#include <time.h>
+
 #include "participant_subservice.cpp"
 #include "wakeup_subservice.cpp"
+#include "management_subservice.cpp"
+
+#define POOL_INTERVAL 1
 
 using namespace std;
 
@@ -38,5 +43,16 @@ void read_CLI(){
             cin >> command;
             wakeupParticipant(command);
         }
+    }
+}
+
+void updateInterface() {
+    while(true) {
+        if (MachinesManager::Instance().mapChanged() == true) {
+            MachinesManager::Instance().printMachines();
+            MachinesManager::Instance().setMapChanged(false);
+        }
+
+        sleep(POOL_INTERVAL);
     }
 }

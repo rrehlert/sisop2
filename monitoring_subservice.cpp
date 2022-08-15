@@ -42,7 +42,7 @@ void monitorateParticipant(string IP) {
         // cout << "[M] Participant " << IP << " set as ASLEEP" << endl;
         awake = false;
         machine->second.setAsleep();
-        MachinesManager::Instance().printMachines();
+        MachinesManager::Instance().setMapChanged(true);
       }
     }
     else {
@@ -51,7 +51,7 @@ void monitorateParticipant(string IP) {
       if (awake == false) {
         awake = true;
         machine->second.setAwake();
-        MachinesManager::Instance().printMachines();
+        MachinesManager::Instance().setMapChanged(true);
       }
     }
 
@@ -76,7 +76,7 @@ void exitListener(){
     MachinesManager::Instance().removeMachine(participant_ip);
     // cout << participant_ip << " Machine exited the service" << endl;
 
-    MachinesManager::Instance().printMachines();
+    MachinesManager::Instance().setMapChanged(true);
 
   }
 
