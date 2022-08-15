@@ -1,18 +1,10 @@
 #include <string>
 #include <iostream>
-#include <time.h>
-#include <map>
 #include <thread>
 
-#include "machine.cpp"
-#include "socket.cpp"
 #include "discovery_subservice.cpp"
 #include "participant_subservice.cpp"
 #include "interface_subservice.cpp"
-#include "management_subservice.cpp"
-
-#define PORT 4000
-#define BROADCAST_IP "255.255.255.255"
 
 using namespace std;
 
@@ -36,7 +28,6 @@ int main(int argc, char *argv[]) {
 
 		// CLI Subservice
 		thread (read_CLI).detach();
-
 		thread (updateInterface).detach();
   }
   else {
