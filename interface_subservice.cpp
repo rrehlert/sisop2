@@ -21,6 +21,24 @@ void signal_handler(int signum){
     exit(0);
 }
 
+void printHeader(bool for_manager = true) {
+    cout.width(25); cout << left << "Hostname";
+    cout.width(15); cout << left << "IP";
+    cout.width(21); cout << left << "Mac";
+    if (for_manager == true) {
+        cout.width(11); cout << left << "Status";
+        cout.width(13); cout << left << "Participating" << endl;
+    }
+    else
+        cout << endl;
+}
+
+void printManager() {
+    cout.width(25); cout << left << manager_hostname;
+    cout.width(15); cout << left << manager_ip;
+    cout.width(21); cout << left << manager_mac << endl;
+}
+
 void read_CLI(){
     string command;
     signal(SIGINT, signal_handler);
@@ -46,11 +64,30 @@ void read_CLI(){
     }
 }
 
-void updateInterface() {
+void updateManagerInterface() {
     while(true) {
         if (MachinesManager::Instance().mapChanged() == true) {
+            system("clear");
+            cout << "Role: [M]" << endl;
+            cout << "Participants:" << endl;
+            printHeader();
             MachinesManager::Instance().printMachines();
             MachinesManager::Instance().setMapChanged(false);
+        }
+
+        sleep(POOL_INTERVAL);
+    }
+}
+
+void updateParticipantInterface() {
+    while(true) {
+        if (manager_changed == true) {
+            system("clear");
+            cout << "Role: [P]" << endl;
+            cout << "Latest manager info:" << endl;
+            printHeader(false);
+            printManager();
+            manager_changed = false;
         }
 
         sleep(POOL_INTERVAL);

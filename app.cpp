@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
 
 		// CLI Subservice
 		thread (read_CLI).detach();
-		thread (updateInterface).detach();
+		thread (updateManagerInterface).detach();
   }
   else {
 		system("clear");
@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
 
 		// CLI Subservice
 		thread (read_CLI).detach();
+		thread (updateParticipantInterface).detach();
   }
 
 	while(true) {};

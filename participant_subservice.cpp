@@ -15,7 +15,8 @@
 
 using namespace std;
 
-string manager_ip, manager_mac, manager_hostname;
+string manager_ip = "", manager_mac = "", manager_hostname = "";
+bool manager_changed = false;
 
 void listenForServicePackets() {
   Socket ptcp_socket;
@@ -31,22 +32,19 @@ void listenForServicePackets() {
     if (recv_res < 0)
       cerr << "[P] ERROR recvfrom" << endl;
     // cout << "[P] Manager (IP " << ptcp_socket.getSenderIP() << " ) asked: " << ptcp_socket.getBuffer() << endl;
-    
-    //Get manager infos
-    manager_ip = ptcp_socket.getSenderIP();
-    string buffer = ptcp_socket.getBuffer();
-    string manager_mac =  buffer.substr(0,17);
-    string manager_hostname = buffer.substr(17);
-    system("clear");
-    cout << "Role: [P]" << endl;
-    cout << "Latest manager info:" << endl;
-    cout.width(25); cout << left << "hostname";
-		cout.width(15); cout << left << "IP";
-		cout.width(21); cout << left << "Mac" << endl;
-    cout.width(25); cout << left << manager_hostname;
-		cout.width(15); cout << left << manager_ip;
-		cout.width(21); cout << left << manager_mac << endl;
 
+    // Get manager infos
+    string received_ip = ptcp_socket.getSenderIP();
+    string buffer = ptcp_socket.getBuffer();
+    string received_mac =  buffer.substr(0,17);
+    string received_hostname = buffer.substr(17);
+
+    if (manager_ip != received_ip || manager_mac != received_mac || manager_hostname != received_hostname) {
+      manager_ip = received_ip;
+      manager_mac = received_mac;
+      manager_hostname = received_hostname;
+      manager_changed = true;
+    }
 
     // Answers the packet received
     send_res = ptcp_socket.sendMessageToSender(mac_addr + hostname);
