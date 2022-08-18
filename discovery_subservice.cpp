@@ -13,7 +13,7 @@
 
 #define PORT 4000
 #define BROADCAST_IP "255.255.255.255"
-#define DISCOVERY_BEACON_INTERVAL 3
+#define DISCOVERY_BEACON_INTERVAL 2
 
 using namespace std;
 
@@ -33,11 +33,7 @@ void discoverParticipants() {
     if (send_res < 0)
       cerr << ("[D] ERROR sendto") << endl;
 
-    recv_res = mng_socket.receiveMessage();
-    if (recv_res < 0) {
-      // cerr << "[D] Nobody answered \n" << endl;
-    }
-    else {
+    while (mng_socket.receiveMessage() > 0) {
       // cout << "[D] Participant answered: " << mng_socket.getBuffer() << endl;
 
       string IP_addr = mng_socket.getSenderIP();
