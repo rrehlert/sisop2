@@ -66,7 +66,7 @@ void exitListener(){
 
   exit_socket.listenPort(EXIT_PORT);
 
-    while(true) {
+  while(true) {
     // Listen for packets sent by the manager to PORT
     recv_res = exit_socket.receiveMessage(true);
     if (recv_res < 0)
@@ -77,7 +77,6 @@ void exitListener(){
     // cout << participant_ip << " Machine exited the service" << endl;
 
     MachinesManager::Instance().setMapChanged(true);
-
   }
 
 }

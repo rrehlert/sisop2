@@ -12,9 +12,9 @@ class Machine {
 	private:
 		string hostname;
   	string IP_addr;
-	string mac_addr;
+		string mac_addr;
   	int status;
-	int participating_count;
+		int participating_count;
 		bool participating;
 
   public:

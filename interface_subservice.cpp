@@ -8,7 +8,7 @@
 #include "wakeup_subservice.cpp"
 #include "management_subservice.cpp"
 
-#define POOL_INTERVAL 1
+#define POLL_INTERVAL 1
 
 using namespace std;
 
@@ -68,14 +68,14 @@ void updateManagerInterface() {
     while(true) {
         if (MachinesManager::Instance().mapChanged() == true) {
             system("clear");
-            cout << "Role: [M]" << endl;
+            cout << "Role: Manager" << endl;
             cout << "Participants:" << endl;
             printHeader();
             MachinesManager::Instance().printMachines();
             MachinesManager::Instance().setMapChanged(false);
         }
 
-        sleep(POOL_INTERVAL);
+        sleep(POLL_INTERVAL);
     }
 }
 
@@ -83,13 +83,13 @@ void updateParticipantInterface() {
     while(true) {
         if (manager_changed == true) {
             system("clear");
-            cout << "Role: [P]" << endl;
+            cout << "Role: Participant" << endl;
             cout << "Latest manager info:" << endl;
             printHeader(false);
             printManager();
             manager_changed = false;
         }
 
-        sleep(POOL_INTERVAL);
+        sleep(POLL_INTERVAL);
     }
 }

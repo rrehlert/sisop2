@@ -17,12 +17,12 @@ int main(int argc, char *argv[]) {
 
   if (manager == true) {
 		system("clear");
-		cout << "Role: [M]" << endl;
+		cout << "Role: Manager" << endl;
     cout << "No participants found yet" << endl;
 
 		// Discovery Subservice
 		thread (discoverParticipants).detach();
-		
+
 		// Exit Handler Subservice
 		thread (exitListener).detach();
 
@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
   }
   else {
 		system("clear");
-  	cout << "Role: [P]" << endl;
+  	cout << "Role: Participant" << endl;
   	cout << "No manager found yet" << endl;
 
 		// Participant Subservice
