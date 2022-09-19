@@ -11,7 +11,9 @@
 
 #define PORT 4000
 #define EXIT_PORT 4001
-#define MAGIC_PORT 9
+#define KEEPALIVE_PORT 4002
+#define MAX_MISSED_KEEPALIVES 3
+#define KEEPALIVE_INTERVAL 1
 
 using namespace std;
 
@@ -50,6 +52,51 @@ void listenForServicePackets() {
     send_res = ptcp_socket.sendMessageToSender(mac_addr + hostname);
     if (send_res < 0)
       cerr << "[P] ERROR sendto" << endl;
+  }
+}
+
+void startManagerElection() {
+  cout << "[P] I'm starting a Manager election" << endl;
+}
+
+void monitorateManagerStatus() {
+  Socket ptcp_socket;
+  int send_res, recv_res, missed_keepalives = 0;
+  string mac_addr = getMacAddress();
+  string hostname = getSelfHostname();
+
+  // Wait for the discovery of a manager
+  while(manager_ip == "") {
+    // cout << "[P] Manager not known yet" << endl;
+    sleep(1);
+  }
+
+  ptcp_socket.setSendAddr(manager_ip, KEEPALIVE_PORT);
+
+  bool keep_monitoring = true;
+  while(keep_monitoring) {
+
+    // Send packet querying the manager's status
+    send_res = ptcp_socket.sendMessage(mac_addr + hostname);
+    if (send_res < 0)
+      cerr << ("[P] ERROR sendto") << endl;
+
+    recv_res = ptcp_socket.receiveMessage();
+    if (recv_res < 0) {
+      missed_keepalives++;
+      cerr << "[P] Manager didn't answer. Missed keepalives: " << missed_keepalives << endl;
+      if (missed_keepalives >= MAX_MISSED_KEEPALIVES) {
+        // cout << "[P] Starting a Manager election" << endl;
+        startManagerElection();
+        keep_monitoring = false;
+      }
+    }
+    else {
+      // cout << "[P] Manager " << IP << " answered: " << ptcp_socket.getBuffer() << endl;
+      missed_keepalives = 0;
+    }
+
+    sleep(KEEPALIVE_INTERVAL);
   }
 }
 

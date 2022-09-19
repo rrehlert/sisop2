@@ -4,6 +4,7 @@
 
 #include "discovery_subservice.cpp"
 #include "participant_subservice.cpp"
+#include "manager_subservice.cpp"
 #include "interface_subservice.cpp"
 
 using namespace std;
@@ -19,6 +20,9 @@ int main(int argc, char *argv[]) {
 		system("clear");
 		cout << "Role: Manager" << endl;
     cout << "No participants found yet" << endl;
+
+		// Manager Subservice
+		thread (listenForKeepalives).detach();
 
 		// Discovery Subservice
 		thread (discoverParticipants).detach();
@@ -37,6 +41,7 @@ int main(int argc, char *argv[]) {
 
 		// Participant Subservice
 		thread (listenForServicePackets).detach();
+		thread (monitorateManagerStatus).detach();
 
 		// CLI Subservice
 		thread (read_CLI).detach();
