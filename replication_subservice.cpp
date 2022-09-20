@@ -23,14 +23,20 @@ void initialReplicationFor(string IP_addr) {
   // Get a vector with all machines to acquire the current info known to the manager.
   auto machines_vec = MachinesManager::Instance().getVectorOfMachines();
 
+  int vec_size = machines_vec.size();
+  int machines_count = 0;
+
   for (auto it = machines_vec.begin(); it != machines_vec.end(); ++it) {
+    string mach_count_s = "[" + to_string(machines_count++) + "/" + to_string(vec_size) + "]";
     string machine_IP = it->getIP();
     string mac_addr = it->getMac();
     string hostname = it->getHostname();
     string status = to_string(it->getStatus());
     string participating = it->isParticipating() ? "1" : "0";
+
     // New Participant packet
-    string msg = "[IR]" + machine_IP + '|' + mac_addr + '|' + hostname + '|' + status + '|' + participating;
+    string msg = "[IR]" + mach_count_s;
+    msg += machine_IP + '|' + mac_addr + '|' + hostname + '|' + status + '|' + participating;
     send_res = mng_socket.sendMessage(msg);
     if (send_res < 0)
       cerr << ("[R] ERROR sendto") << endl;
@@ -55,7 +61,8 @@ void replicateNewParticipant(string IP_addr, string mac_addr, string hostname) {
       mng_socket.setSendAddr(*it, REPLICATION_PORT);
 
       // New Participant packet
-      send_res = mng_socket.sendMessage("[NP]" + IP_addr + '|' + mac_addr + '|' + hostname);
+      string msg = "[NP]" + IP_addr + '|' + mac_addr + '|' + hostname;
+      send_res = mng_socket.sendMessage(msg);
       if (send_res < 0)
         cerr << ("[R] ERROR sendto") << endl;
 
@@ -78,7 +85,8 @@ void replicateNewStatus(string IP_addr, string status_code) {
     mng_socket.setSendAddr(*it, REPLICATION_PORT);
 
     // New Status packet
-    send_res = mng_socket.sendMessage(status_code + IP_addr);
+    string msg = status_code + IP_addr;
+    send_res = mng_socket.sendMessage(msg);
     if (send_res < 0)
       cerr << ("[R] ERROR sendto") << endl;
 
@@ -109,11 +117,12 @@ void replicateExitStatus(string IP_addr) {
 // Parses the `message` to get data for a new participant, and creates it with default values for
 // status and participating.
 // Expected format:
-// IP_addr|mac_addr|hostname
+// [NP]IP_addr|mac_addr|hostname
 void newParticipantHandler(string message) {
   int divider1 = message.find('|');
   int divider2 = message.find('|', divider1 + 1);
-  string IP_addr = message.substr(5, divider1 - 5);
+  int data_start = message.find_last_of(']') + 1;
+  string IP_addr = message.substr(data_start, divider1 - data_start);
   string mac_addr = message.substr(divider1 + 1, divider2 - divider1 - 1);
   string hostname = message.substr(divider2 + 1);
 
@@ -124,13 +133,14 @@ void newParticipantHandler(string message) {
 // Parses the `message` to get data for a new participant, and creates it.
 // Although similar to newParticipantHandler, it's used for initial replication, so needs more info.
 // Expected format:
-// IP_addr|mac_addr|hostname|status|participating
+// [IR][X/Y]IP_addr|mac_addr|hostname|status|participating
 void initialReplicationHandler(string message) {
   int divider1 = message.find('|');
   int divider2 = message.find('|', divider1 + 1);
   int divider3 = message.find('|', divider2 + 1);
   int divider4 = message.find('|', divider3 + 1);
-  string IP_addr = message.substr(5, divider1 - 5);
+  int data_start = message.find_last_of(']') + 1;
+  string IP_addr = message.substr(data_start, divider1 - data_start);
   string mac_addr = message.substr(divider1 + 1, divider2 - divider1 - 1);
   string hostname = message.substr(divider2 + 1, divider3 - divider2 - 1);
   string status_s = message.substr(divider3 + 1, divider4 - divider3 - 1);
@@ -146,10 +156,12 @@ void initialReplicationHandler(string message) {
 // Expected format:
 // [status_code]IP_addr
 void newStatusHandler(string message) {
-  string new_status = message.substr(0, 4);
-  string IP_addr = message.substr(5);
+  int IP_start = message.find_last_of(']') + 1;
+  string new_status = message.substr(0, IP_start);
+  string IP_addr = message.substr(IP_start);
   auto machine = MachinesManager::Instance().getMachine(IP_addr);
 
+  // cout << "NS: " << new_status + ' ' + IP_addr << endl;
   if (new_status == "[AW]") {
     machine->second.setAwake();
   }
@@ -173,7 +185,7 @@ void newStatusHandler(string message) {
 // [AS]192.168.15.98
 // [EX]192.168.15.98
 // [PA]192.168.15.98
-// [IR]192.168.15.135|3c:7c:3f:7b:8a:86|wpramio-pc|1|1
+// [IR][1/1]192.168.15.135|3c:7c:3f:7b:8a:86|wpramio-pc|1|1
 void listenForReplicationPackets() {
   Socket ptcp_socket;
   int send_res, recv_res;
