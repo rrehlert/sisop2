@@ -54,6 +54,7 @@ void monitorateParticipant(string IP) {
         awake = true;
         machine->second.setAwake();
         MachinesManager::Instance().setMapChanged(true);
+        initialReplicationFor(IP);
         replicateAwakeStatus(IP);
       }
     }

@@ -27,7 +27,7 @@ void initialReplicationFor(string IP_addr) {
   int machines_count = 0;
 
   for (auto it = machines_vec.begin(); it != machines_vec.end(); ++it) {
-    string mach_count_s = "[" + to_string(machines_count++) + "/" + to_string(vec_size) + "]";
+    string mach_count_s = "[" + to_string(++machines_count) + "/" + to_string(vec_size) + "]";
     string machine_IP = it->getIP();
     string mac_addr = it->getMac();
     string hostname = it->getHostname();
@@ -140,6 +140,7 @@ void initialReplicationHandler(string message) {
   int divider3 = message.find('|', divider2 + 1);
   int divider4 = message.find('|', divider3 + 1);
   int data_start = message.find_last_of(']') + 1;
+  int mach_count_start = message.find(']') + 2;
   string IP_addr = message.substr(data_start, divider1 - data_start);
   string mac_addr = message.substr(divider1 + 1, divider2 - divider1 - 1);
   string hostname = message.substr(divider2 + 1, divider3 - divider2 - 1);
@@ -147,6 +148,12 @@ void initialReplicationHandler(string message) {
   string participating_s = message.substr(divider4 + 1);
   int status = stoi(status_s);
   bool participating = (participating_s == "1");
+  int mach_count = stoi(message.substr(mach_count_start, 1));
+
+  if (mach_count == 1) {
+    // cout << "IR INITIATED!" << endl;
+    MachinesManager::Instance().clearMachines();
+  }
 
   // cout << "IR: " << IP_addr + ' ' + mac_addr + ' ' + hostname + ' ' + status_s + ' ' + participating_s << endl;
   MachinesManager::Instance().createMachine(IP_addr, mac_addr, hostname, status, participating);
