@@ -81,13 +81,20 @@ void updateManagerInterface() {
 
 void updateParticipantInterface() {
     while(true) {
-        if (manager_changed == true) {
+        if (manager_changed == true || MachinesManager::Instance().mapChanged() == true) {
             system("clear");
             cout << "Role: Participant" << endl;
             cout << "Latest manager info:" << endl;
             printHeader(false);
             printManager();
             manager_changed = false;
+
+            // REMOVE THIS FOR PRODUCTION
+            // Print machines table to supervise the replication
+            cout << '\n' << "Participants:" << endl;
+            printHeader();
+            MachinesManager::Instance().printMachines();
+            MachinesManager::Instance().setMapChanged(false);
         }
 
         sleep(POLL_INTERVAL);

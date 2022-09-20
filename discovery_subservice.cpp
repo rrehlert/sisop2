@@ -10,6 +10,7 @@
 #include "management_subservice.cpp"
 #include "monitoring_subservice.cpp"
 #include "information_subservice.cpp"
+#include "replication_subservice.cpp"
 
 #define PORT 4000
 #define BROADCAST_IP "255.255.255.255"
@@ -55,6 +56,8 @@ void discoverParticipants() {
             // cout << "[D] Machine " << IP_addr << " is being monitorated again" << endl;
             machine->second.setParticipating(true);
             MachinesManager::Instance().setMapChanged(true);
+            initialReplicationFor(IP_addr);
+            replicateParticipatingStatus(IP_addr);
             // Monitoring Subservice
             thread (monitorateParticipant, IP_addr).detach();
           }
@@ -67,6 +70,8 @@ void discoverParticipants() {
         // cout << "[D] Machine is unknown! Adding to the map \n" << endl;
         MachinesManager::Instance().createMachine(IP_addr, mac_addr, hostname);
         MachinesManager::Instance().setMapChanged(true);
+        initialReplicationFor(IP_addr);
+        replicateNewParticipant(IP_addr, mac_addr, hostname);
 
         // Monitoring Subservice
         thread (monitorateParticipant, IP_addr).detach();

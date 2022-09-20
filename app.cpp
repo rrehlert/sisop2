@@ -5,6 +5,7 @@
 #include "discovery_subservice.cpp"
 #include "participant_subservice.cpp"
 #include "interface_subservice.cpp"
+#include "replication_subservice.cpp"
 
 using namespace std;
 
@@ -37,6 +38,7 @@ int main(int argc, char *argv[]) {
 
 		// Participant Subservice
 		thread (listenForServicePackets).detach();
+		thread (listenForReplicationPackets).detach();
 
 		// CLI Subservice
 		thread (read_CLI).detach();
