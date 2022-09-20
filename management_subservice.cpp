@@ -76,14 +76,6 @@ class MachinesManager {
       map_mutex.unlock();
     }
 
-    void clearMachines() {
-      map_mutex.lock();
-
-      machines.clear();
-
-      map_mutex.unlock();
-    }
-
     auto getMachineByHostname(string hostname) {
       map_mutex.lock();
 

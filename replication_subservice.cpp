@@ -152,7 +152,6 @@ void initialReplicationHandler(string message) {
 
   if (mach_count == 1) {
     // cout << "IR INITIATED!" << endl;
-    MachinesManager::Instance().clearMachines();
   }
 
   // cout << "IR: " << IP_addr + ' ' + mac_addr + ' ' + hostname + ' ' + status_s + ' ' + participating_s << endl;
@@ -206,6 +205,7 @@ void listenForReplicationPackets() {
       cerr << "[R] ERROR recvfrom" << endl;
 
     string buffer = ptcp_socket.getBuffer();
+    // cout << "Rep msg: " << buffer << endl;
 
     // new participant
     if (buffer.substr(0, 4) == "[NP]") {
