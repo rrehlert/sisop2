@@ -3,6 +3,7 @@
 #include <iostream>
 #include <time.h>
 #include <map>
+#include <vector>
 #include <mutex>
 
 #include "machine.cpp"
@@ -67,6 +68,14 @@ class MachinesManager {
       map_mutex.unlock();
     }
 
+    void createMachine(string IP, string mac, string hostname, int status, bool participating) {
+      Machine mach(IP, mac, hostname, status, participating);
+      map_mutex.lock();
+
+      machines[IP] = mach;
+      map_mutex.unlock();
+    }
+
     auto getMachineByHostname(string hostname) {
       map_mutex.lock();
 
@@ -85,6 +94,32 @@ class MachinesManager {
       map_mutex.unlock();
 
       return res;
+    }
+
+    auto getVectorOfIPs() {
+      vector<string> vec;
+
+      map_mutex.lock();
+
+      for (auto it = machines.begin(); it != machines.end(); ++it)
+        vec.push_back(it->second.getIP());
+
+      map_mutex.unlock();
+
+      return vec;
+    }
+
+    auto getVectorOfMachines() {
+      vector<Machine> vec;
+
+      map_mutex.lock();
+
+      for (auto it = machines.begin(); it != machines.end(); ++it)
+        vec.push_back(it->second);
+
+      map_mutex.unlock();
+
+      return vec;
     }
 
     void removeMachine(string IP){

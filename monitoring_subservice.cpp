@@ -8,10 +8,11 @@
 #include "machine.cpp"
 #include "management_subservice.cpp"
 #include "information_subservice.cpp"
+#include "replication_subservice.cpp"
 
 #define PORT 4000
 #define EXIT_PORT 4001
-#define MAX_MISSED_CALLS 10
+#define MAX_MISSED_CALLS 4
 #define MONITORING_PACKET_INTERVAL 1
 
 using namespace std;
@@ -43,6 +44,7 @@ void monitorateParticipant(string IP) {
         awake = false;
         machine->second.setAsleep();
         MachinesManager::Instance().setMapChanged(true);
+        replicateAsleepStatus(IP);
       }
     }
     else {
@@ -52,6 +54,8 @@ void monitorateParticipant(string IP) {
         awake = true;
         machine->second.setAwake();
         MachinesManager::Instance().setMapChanged(true);
+        initialReplicationFor(IP);
+        replicateAwakeStatus(IP);
       }
     }
 
@@ -74,6 +78,7 @@ void exitListener(){
     // cout << "[M] Participant (IP " << exit_socket.getSenderIP() << " ) asked: " << exit_socket.getBuffer() << endl;
     participant_ip = exit_socket.getSenderIP();
     MachinesManager::Instance().removeMachine(participant_ip);
+    replicateExitStatus(participant_ip);
     // cout << participant_ip << " Machine exited the service" << endl;
 
     MachinesManager::Instance().setMapChanged(true);

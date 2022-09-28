@@ -20,13 +20,13 @@ class Machine {
   public:
 		Machine(){};
 
-		Machine(string IP, string mac, string _hostname) {
+		Machine(string IP, string mac, string _hostname, int _status = AWAKE, bool _participating = false) {
 			hostname = _hostname;
 			IP_addr = IP;
 			mac_addr = mac;
-			status = AWAKE;
-			participating_count = 0;
-			participating = false;
+			status = _status;
+			participating_count = _participating ? 2 : 0;
+			participating = _participating;
 		}
 
 		Machine(const Machine& m1) {
