@@ -9,6 +9,9 @@
 #include <unistd.h>
 #include <iostream>
 #include <string>
+#include <time.h>
+
+#define TIMEOUT_SECONDS 2
 
 using namespace std;
 
@@ -27,8 +30,18 @@ class Socket {
         cerr << "ERROR opening socket" << endl;
 		}
 
+    void setTimeoutOpt() {
+      struct timeval tv;
+      tv.tv_sec = TIMEOUT_SECONDS;
+      tv.tv_usec = 0;
+      if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO,&tv,sizeof(tv)) < 0) {
+        perror("Error");
+      }
+    }
+
     // Sets the socket to broadcast mode.
     void setBroadcastOpt() {
+
       int broadcastPermission = 1;
       if (setsockopt(socket_fd, SOL_SOCKET, SO_BROADCAST, &broadcastPermission, sizeof(broadcastPermission)) < 0){
         cerr << "setsockopt error" << endl;

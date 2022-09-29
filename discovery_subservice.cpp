@@ -18,6 +18,15 @@
 
 using namespace std;
 
+void addParticipantsFromTable(){
+  vector<Machine> machines_vec = MachinesManager::Instance().getVectorOfMachines();
+  for (Machine mac : machines_vec){
+    thread (monitorateParticipant, mac.getIP()).detach();
+    cout << "machine " << mac.getIP() << "Loaded from table" << endl;
+  }
+}
+
+
 void discoverParticipants() {
   Socket mng_socket;
   int send_res, recv_res;
@@ -27,6 +36,9 @@ void discoverParticipants() {
 
   mng_socket.setBroadcastOpt();
 	mng_socket.setSendAddr(BROADCAST_IP, PORT);
+
+  addParticipantsFromTable();
+
 
   while(true) {
     // Send packet looking for participants

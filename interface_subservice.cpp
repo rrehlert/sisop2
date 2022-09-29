@@ -61,6 +61,11 @@ void read_CLI(){
             cin >> command;
             wakeupParticipant(command);
         }
+        if ((command.compare("MANAGER") == 0 && manager == false)){
+            cout << " Turning into MANAGER" << endl;
+            sendExitPacket();
+            becomeManager();
+        }
     }
 }
 
@@ -80,7 +85,7 @@ void updateManagerInterface() {
 }
 
 void updateParticipantInterface() {
-    while(true) {
+    while(!manager) {
         if (manager_changed == true || MachinesManager::Instance().mapChanged() == true) {
             system("clear");
             cout << "Role: Participant" << endl;
@@ -99,4 +104,5 @@ void updateParticipantInterface() {
 
         sleep(POLL_INTERVAL);
     }
+    //cout << "Exiting Thread 4";
 }

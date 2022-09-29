@@ -12,6 +12,8 @@
 
 using namespace std;
 
+extern bool manager;
+
 // Replicates the entire Participants map for the new participant `IP_addr`.
 // Message prefix: [IR]
 void initialReplicationFor(string IP_addr) {
@@ -196,13 +198,16 @@ void listenForReplicationPackets() {
   Socket ptcp_socket;
   int send_res, recv_res;
 
+  ptcp_socket.setTimeoutOpt();
   ptcp_socket.listenPort(REPLICATION_PORT);
 
-  while(true) {
+  while(!manager) {
     // Listen for packets sent by the manager to REPLICATION_PORT
     recv_res = ptcp_socket.receiveMessage(true);
-    if (recv_res < 0)
-      cerr << "[R] ERROR recvfrom" << endl;
+    if (recv_res < 0){
+      //cerr << "[R] ERROR recvfrom" << endl;
+      continue;
+    }
 
     string buffer = ptcp_socket.getBuffer();
     // cout << "Rep msg: " << buffer << endl;
@@ -226,4 +231,5 @@ void listenForReplicationPackets() {
     if (send_res < 0)
       cerr << "[R] ERROR sendto" << endl;
   }
+  //cout << "Exiting Thread 3";
 }

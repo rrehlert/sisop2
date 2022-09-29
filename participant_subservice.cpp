@@ -13,12 +13,14 @@
 #define EXIT_PORT 4001
 #define KEEPALIVE_PORT 4002
 #define MAX_MISSED_KEEPALIVES 3
+#define MAX_MISSED_DISCOVERY 3
 #define KEEPALIVE_INTERVAL 1
 
 using namespace std;
 
 string manager_ip = "", manager_mac = "", manager_hostname = "";
 bool manager_changed = false;
+extern bool manager;
 
 void listenForServicePackets() {
   Socket ptcp_socket;
@@ -26,13 +28,20 @@ void listenForServicePackets() {
   string mac_addr = getMacAddress();
   string hostname = getSelfHostname();
 
+  ptcp_socket.setTimeoutOpt();
   ptcp_socket.listenPort(PORT);
 
-  while(true) {
+  while(!manager) {
+    // if (manager_ip == "")
+    //   continue;
     // Listen for packets sent by the manager to PORT
+
     recv_res = ptcp_socket.receiveMessage(true);
-    if (recv_res < 0)
-      cerr << "[P] ERROR recvfrom" << endl;
+    if (recv_res < 0){
+      //cerr << "[P] ERROR recvfrom" << endl;
+      //cout << recv_res << endl;
+      continue;
+    }
     // cout << "[P] Manager (IP " << ptcp_socket.getSenderIP() << " ) asked: " << ptcp_socket.getBuffer() << endl;
 
     // Get manager infos
@@ -53,6 +62,7 @@ void listenForServicePackets() {
     if (send_res < 0)
       cerr << "[P] ERROR sendto" << endl;
   }
+  //cout << "Exiting Thread 1";
 }
 
 void startManagerElection() {
@@ -61,43 +71,50 @@ void startManagerElection() {
 
 void monitorateManagerStatus() {
   Socket ptcp_socket;
-  int send_res, recv_res, missed_keepalives = 0;
+  int send_res, recv_res, missed_keepalives = 0, manager_discovery_count = 0;
   string mac_addr = getMacAddress();
   string hostname = getSelfHostname();
 
   // Wait for the discovery of a manager
-  while(manager_ip == "") {
+  while(manager_ip == "" && !manager) {
     // cout << "[P] Manager not known yet" << endl;
+    // manager_discovery_count++ // IDEA
+    // if(manager_discovery_count >= MAX_MISSED_DISCOVERY) // IDEA
+    // startManagerElection(); // IDEA
+    //
     sleep(1);
   }
 
   ptcp_socket.setSendAddr(manager_ip, KEEPALIVE_PORT);
+  while (!manager){
+    bool keep_monitoring = true;
+    while(keep_monitoring && !manager) {
 
-  bool keep_monitoring = true;
-  while(keep_monitoring) {
+      // Send packet querying the manager's status
+      send_res = ptcp_socket.sendMessage(mac_addr + hostname);
+      if (send_res < 0)
+        cerr << ("[P] ERROR sendto") << endl;
 
-    // Send packet querying the manager's status
-    send_res = ptcp_socket.sendMessage(mac_addr + hostname);
-    if (send_res < 0)
-      cerr << ("[P] ERROR sendto") << endl;
-
-    recv_res = ptcp_socket.receiveMessage();
-    if (recv_res < 0) {
-      missed_keepalives++;
-      cerr << "[P] Manager didn't answer. Missed keepalives: " << missed_keepalives << endl;
-      if (missed_keepalives >= MAX_MISSED_KEEPALIVES) {
-        // cout << "[P] Starting a Manager election" << endl;
-        startManagerElection();
-        keep_monitoring = false;
+      recv_res = ptcp_socket.receiveMessage();
+      if (recv_res < 0) {
+        missed_keepalives++;
+        cerr << "[P] Manager didn't answer. Missed keepalives: " << missed_keepalives << endl;
+        if (missed_keepalives >= MAX_MISSED_KEEPALIVES) {
+          // cout << "[P] Starting a Manager election" << endl;
+          startManagerElection();
+          // if (newManager == true) {becomeManager()} // IDEA
+          keep_monitoring = false;
+        }
       }
-    }
-    else {
-      // cout << "[P] Manager " << IP << " answered: " << ptcp_socket.getBuffer() << endl;
-      missed_keepalives = 0;
-    }
+      else {
+        // cout << "[P] Manager " << IP << " answered: " << ptcp_socket.getBuffer() << endl;
+        missed_keepalives = 0;
+      }
 
-    sleep(KEEPALIVE_INTERVAL);
+      sleep(KEEPALIVE_INTERVAL);
+    }
   }
+  //cout << "Exiting Thread 2";
 }
 
 void sendExitPacket(){
@@ -105,4 +122,9 @@ void sendExitPacket(){
   exit_socket.setSendAddr(manager_ip, EXIT_PORT);
   //Send exit message to specified exit port
   int exit_message = exit_socket.sendMessage("sleep service exit");
+}
+
+void becomeManager(){
+  
+  manager = true;
 }
