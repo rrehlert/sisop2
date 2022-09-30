@@ -62,6 +62,7 @@ void listenForServicePackets() {
     if (send_res < 0)
       cerr << "[P] ERROR sendto" << endl;
   }
+  ptcp_socket.closeSocket();
   //cout << "Exiting Thread 1";
 }
 
@@ -114,6 +115,7 @@ void monitorateManagerStatus() {
       sleep(KEEPALIVE_INTERVAL);
     }
   }
+  ptcp_socket.closeSocket();
   //cout << "Exiting Thread 2";
 }
 
@@ -125,6 +127,5 @@ void sendExitPacket(){
 }
 
 void becomeManager(){
-  
   manager = true;
 }

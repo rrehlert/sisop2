@@ -30,6 +30,13 @@ class Socket {
         cerr << "ERROR opening socket" << endl;
 		}
 
+    // Close the socket
+    void closeSocket(){
+      close(socket_fd);
+    }
+
+    // Sets the socket to timeout in TIMEOUT_SECONDS seconds
+    // Avoid thread being stuck while changing between roles
     void setTimeoutOpt() {
       struct timeval tv;
       tv.tv_sec = TIMEOUT_SECONDS;

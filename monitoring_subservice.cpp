@@ -70,7 +70,7 @@ void exitListener(){
 
   exit_socket.listenPort(EXIT_PORT);
 
-  while(true) {
+  while(manager) {
     // Listen for packets sent by the manager to PORT
     recv_res = exit_socket.receiveMessage(true);
     if (recv_res < 0)
@@ -83,5 +83,5 @@ void exitListener(){
 
     MachinesManager::Instance().setMapChanged(true);
   }
-
+  exit_socket.closeSocket();
 }

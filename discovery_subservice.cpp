@@ -39,8 +39,7 @@ void discoverParticipants() {
 
   addParticipantsFromTable();
 
-
-  while(true) {
+  while(manager) {
     // Send packet looking for participants
     send_res = mng_socket.sendMessage(mac_addr + hostname);
     if (send_res < 0)
@@ -92,4 +91,5 @@ void discoverParticipants() {
 
     sleep(DISCOVERY_BEACON_INTERVAL);
   }
+  mng_socket.closeSocket();
 }

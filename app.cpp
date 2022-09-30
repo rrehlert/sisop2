@@ -16,10 +16,11 @@ int main(int argc, char *argv[]) {
 
 //	if (argc > 1 && (string)argv[1] == "manager")
 //    manager = true;
-
+	while(true){
+	if (manager == false) {
 		system("clear");
-  	cout << "Role: Participant" << endl;
-  	cout << "No manager found yet" << endl;
+		cout << "Role: Participant" << endl;
+		cout << "No manager found yet" << endl;
 
 		// Participant Subservice
 		thread (listenForServicePackets).detach();
@@ -31,8 +32,7 @@ int main(int argc, char *argv[]) {
 		// CLI Subservice
 		thread (read_CLI).detach();
 		thread (updateParticipantInterface).detach();
-
-	cout << "EXIT PARTICIPANT" << endl;
+	}
 	while(!manager) {}
 	if (manager == true) {
 			cout << "ENTERING MANAGER" << endl;
@@ -46,6 +46,9 @@ int main(int argc, char *argv[]) {
 			// Discovery Subservice
 			thread (discoverParticipants).detach();
 
+			// Listen when manager is awaken
+			thread (magicListener).detach();
+
 			// Exit Handler Subservice
 			thread (exitListener).detach();
 
@@ -53,6 +56,7 @@ int main(int argc, char *argv[]) {
 			//thread (read_CLI).detach();
 			thread (updateManagerInterface).detach();
   		}
-	while(true){}
+	while(manager) {}
+	}
 	return 0;
 }

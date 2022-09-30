@@ -231,5 +231,6 @@ void listenForReplicationPackets() {
     if (send_res < 0)
       cerr << "[R] ERROR sendto" << endl;
   }
+  ptcp_socket.closeSocket();
   //cout << "Exiting Thread 3";
 }

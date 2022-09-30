@@ -11,7 +11,7 @@
 #include "monitoring_subservice.cpp"
 
 #define PORT 4000
-#define MAGIC_PORT 9
+#define MAGIC_PORT 4005
 #define BROADCAST_IP "255.255.255.255"
 
 unsigned getHexFromString(const std::string& s)

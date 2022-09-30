@@ -7,6 +7,7 @@
 #include "participant_subservice.cpp"
 #include "wakeup_subservice.cpp"
 #include "management_subservice.cpp"
+#include "manager_subservice.cpp"
 
 #define POLL_INTERVAL 1
 
@@ -63,14 +64,17 @@ void read_CLI(){
         }
         if ((command.compare("MANAGER") == 0 && manager == false)){
             cout << " Turning into MANAGER" << endl;
-            sendExitPacket();
             becomeManager();
+        }
+        if ((command.compare("PARTICIPANT") == 0 && manager == true)){
+            cout << " Turning into PARTICIPANT" << endl;
+            becomeParticipant();
         }
     }
 }
 
 void updateManagerInterface() {
-    while(true) {
+    while(manager) {
         if (MachinesManager::Instance().mapChanged() == true) {
             system("clear");
             cout << "Role: Manager" << endl;
