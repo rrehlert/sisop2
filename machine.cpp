@@ -41,6 +41,10 @@ class Machine {
 			participating = m1.participating;
 		}
 
+		int getID() {
+			return id;
+		}
+
 		int getCount() {
 			return participating_count;
 		}

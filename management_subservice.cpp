@@ -77,9 +77,9 @@ class MachinesManager {
       map_mutex.unlock();
     }
 
-    void createMachine(string IP, string mac, string hostname, int status, bool participating) {
+    void createMachine(int ID, string IP, string mac, string hostname, int status, bool participating) {
       incNextId();
-      Machine mach(next_id, IP, mac, hostname, status, participating);
+      Machine mach(ID, IP, mac, hostname, status, participating);
       map_mutex.lock();
 
       machines[IP] = mach;

@@ -35,10 +35,11 @@ void initialReplicationFor(string IP_addr) {
     string hostname = it->getHostname();
     string status = to_string(it->getStatus());
     string participating = it->isParticipating() ? "1" : "0";
+    string id = to_string(it->getID());
 
     // New Participant packet
     string msg = "[IR]" + mach_count_s;
-    msg += machine_IP + '|' + mac_addr + '|' + hostname + '|' + status + '|' + participating;
+    msg += machine_IP + '|' + mac_addr + '|' + hostname + '|' + status + '|' + participating + '|' + id;
     send_res = mng_socket.sendMessage(msg);
     if (send_res < 0)
       cerr << ("[R] ERROR sendto") << endl;
@@ -141,15 +142,19 @@ void initialReplicationHandler(string message) {
   int divider2 = message.find('|', divider1 + 1);
   int divider3 = message.find('|', divider2 + 1);
   int divider4 = message.find('|', divider3 + 1);
+  int divider5 = message.find('|', divider4 + 1);
+
   int data_start = message.find_last_of(']') + 1;
   int mach_count_start = message.find(']') + 2;
   string IP_addr = message.substr(data_start, divider1 - data_start);
   string mac_addr = message.substr(divider1 + 1, divider2 - divider1 - 1);
   string hostname = message.substr(divider2 + 1, divider3 - divider2 - 1);
   string status_s = message.substr(divider3 + 1, divider4 - divider3 - 1);
-  string participating_s = message.substr(divider4 + 1);
+  string participating_s = message.substr(divider4 + 1, divider5 - divider4 - 1);
+  string id_s = message.substr(divider5 + 1);
   int status = stoi(status_s);
   bool participating = (participating_s == "1");
+  int id = stoi(id_s);
   int mach_count = stoi(message.substr(mach_count_start, 1));
 
   if (mach_count == 1) {
@@ -157,8 +162,8 @@ void initialReplicationHandler(string message) {
     // cout << "IR INITIATED!" << endl;
   }
 
-  // cout << "IR: " << IP_addr + ' ' + mac_addr + ' ' + hostname + ' ' + status_s + ' ' + participating_s << endl;
-  MachinesManager::Instance().createMachine(IP_addr, mac_addr, hostname, status, participating);
+  // cout << "IR: " << IP_addr + ' ' + mac_addr + ' ' + hostname + ' ' + status_s + ' ' + participating_s + ' ' + id_s << endl;
+  MachinesManager::Instance().createMachine(id, IP_addr, mac_addr, hostname, status, participating);
 }
 
 // Parses the `message` to get data for a new participant's status, and updates it.
