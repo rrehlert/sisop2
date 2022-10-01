@@ -153,6 +153,7 @@ void initialReplicationHandler(string message) {
   int mach_count = stoi(message.substr(mach_count_start, 1));
 
   if (mach_count == 1) {
+    MachinesManager::Instance().setNextId(0);
     // cout << "IR INITIATED!" << endl;
   }
 

@@ -10,6 +10,7 @@ using namespace std;
 class Machine {
 
 	private:
+		int id;
 		string hostname;
   	string IP_addr;
 		string mac_addr;
@@ -20,7 +21,8 @@ class Machine {
   public:
 		Machine(){};
 
-		Machine(string IP, string mac, string _hostname, int _status = AWAKE, bool _participating = false) {
+		Machine(int _id, string IP, string mac, string _hostname, int _status = AWAKE, bool _participating = false) {
+			id = _id;
 			hostname = _hostname;
 			IP_addr = IP;
 			mac_addr = mac;
@@ -30,6 +32,7 @@ class Machine {
 		}
 
 		Machine(const Machine& m1) {
+			id = m1.id;
 			hostname = m1.hostname;
 			IP_addr = m1.IP_addr;
 			mac_addr = m1.mac_addr;
@@ -103,6 +106,7 @@ class Machine {
 		}
 
 		void print() {
+			cout.width(7);  cout << left << id;
 			cout.width(25); cout << left << hostname;
 			cout.width(15); cout << left << IP_addr;
 			cout.width(21); cout << left << mac_addr;

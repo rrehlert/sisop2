@@ -17,7 +17,7 @@ class MachinesManager {
   private:
     map<string, Machine> machines;
     bool map_changed = false;
-
+    int next_id = 0;
     // Constructor and destructor must be private to ensure only one instance of the class
     // is created.
     MachinesManager() {}
@@ -32,6 +32,14 @@ class MachinesManager {
 
       // Return a reference to our instance.
       return myInstance;
+    }
+
+    void incNextId() {
+      next_id++;
+    }
+
+    void setNextId(int new_val) {
+      next_id = new_val;
     }
 
     void setMapChanged(bool new_status) {
@@ -61,7 +69,8 @@ class MachinesManager {
     }
 
     void createMachine(string IP, string mac, string hostname) {
-      Machine mach(IP, mac, hostname);
+      incNextId();
+      Machine mach(next_id, IP, mac, hostname);
       map_mutex.lock();
 
       machines[IP] = mach;
@@ -69,7 +78,8 @@ class MachinesManager {
     }
 
     void createMachine(string IP, string mac, string hostname, int status, bool participating) {
-      Machine mach(IP, mac, hostname, status, participating);
+      incNextId();
+      Machine mach(next_id, IP, mac, hostname, status, participating);
       map_mutex.lock();
 
       machines[IP] = mach;

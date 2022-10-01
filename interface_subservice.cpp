@@ -23,6 +23,7 @@ void signal_handler(int signum){
 }
 
 void printHeader(bool for_manager = true) {
+    cout.width(7); cout << left << "ID";
     cout.width(25); cout << left << "Hostname";
     cout.width(15); cout << left << "IP";
     cout.width(21); cout << left << "Mac";
