@@ -17,6 +17,7 @@ class Machine {
   	int status;
 		int participating_count;
 		bool participating;
+		bool is_manager;
 
   public:
 		Machine(){};
@@ -29,6 +30,7 @@ class Machine {
 			status = _status;
 			participating_count = _participating ? 2 : 0;
 			participating = _participating;
+			is_manager = false;
 		}
 
 		Machine(const Machine& m1) {
@@ -39,6 +41,7 @@ class Machine {
 			status = m1.status;
 			participating_count = m1.participating_count;
 			participating = m1.participating;
+			is_manager = m1.is_manager;
 		}
 
 		int getID() {
@@ -109,12 +112,21 @@ class Machine {
 			participating = new_status;
 		}
 
+		bool isManager() {
+			return is_manager;
+		}
+
+		void setIsManager(bool new_value) {
+			is_manager = new_value;
+		}
+
 		void print() {
 			cout.width(7);  cout << left << id;
 			cout.width(25); cout << left << hostname;
 			cout.width(15); cout << left << IP_addr;
 			cout.width(21); cout << left << mac_addr;
 			cout.width(11); cout << left << (status == AWAKE ? "awake" : "asleep");
-			cout.width(13); cout << left << (participating == true ? "true" : "false") << endl;
+			cout.width(18); cout << left << (participating == true ? "true" : "false");
+			cout.width(8); cout << left << (is_manager == true ? "MANAGER" : " ") << endl;
 		}
 };
