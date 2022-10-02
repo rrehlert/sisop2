@@ -119,6 +119,10 @@ class MachinesManager {
       return vec;
     }
 
+    int getMachineId(string IP) {
+      return getMachine(IP)->second.getID();
+    }
+
     auto getVectorOfMachines() {
       vector<Machine> vec;
 
