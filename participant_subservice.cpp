@@ -84,33 +84,31 @@ void monitorateManagerStatus() {
   }
 
   ptcp_socket.setSendAddr(manager_ip, KEEPALIVE_PORT);
-  while (!manager){
-    bool keep_monitoring = true;
-    while(keep_monitoring && !manager) {
+  bool keep_monitoring = true;
+  while(keep_monitoring && !manager) {
 
-      // Send packet querying the manager's status
-      send_res = ptcp_socket.sendMessage(mac_addr + hostname);
-      if (send_res < 0)
-        cerr << ("[P] ERROR sendto") << endl;
+    // Send packet querying the manager's status
+    send_res = ptcp_socket.sendMessage(mac_addr + hostname);
+    if (send_res < 0)
+      cerr << ("[P] ERROR sendto") << endl;
 
-      recv_res = ptcp_socket.receiveMessage();
-      if (recv_res < 0) {
-        missed_keepalives++;
-        cerr << "[P] Manager didn't answer. Missed keepalives: " << missed_keepalives << endl;
-        if (missed_keepalives >= MAX_MISSED_KEEPALIVES) {
-          // cout << "[P] Starting a Manager election" << endl;
-          startManagerElection();
-          // if (newManager == true) {becomeManager()} // IDEA
-          keep_monitoring = false;
-        }
+    recv_res = ptcp_socket.receiveMessage();
+    if (recv_res < 0) {
+      missed_keepalives++;
+      cerr << "[P] Manager didn't answer. Missed keepalives: " << missed_keepalives << endl;
+      if (missed_keepalives >= MAX_MISSED_KEEPALIVES) {
+        // cout << "[P] Starting a Manager election" << endl;
+        startManagerElection();
+        // if (newManager == true) {becomeManager()} // IDEA
+        keep_monitoring = false;
       }
-      else {
-        // cout << "[P] Manager " << IP << " answered: " << ptcp_socket.getBuffer() << endl;
-        missed_keepalives = 0;
-      }
-
-      sleep(KEEPALIVE_INTERVAL);
     }
+    else {
+      // cout << "[P] Manager " << IP << " answered: " << ptcp_socket.getBuffer() << endl;
+      missed_keepalives = 0;
+    }
+
+    sleep(KEEPALIVE_INTERVAL);
   }
   ptcp_socket.closeSocket();
   cerr << "[P] Exiting monitorateManagerStatus thread" << endl;
