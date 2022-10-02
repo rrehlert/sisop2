@@ -132,6 +132,19 @@ class MachinesManager {
       return vec;
     }
 
+    void setNewManager(string ip) {
+      map_mutex.lock();
+
+      for (auto mac : machines){
+        if ((mac.second.getIP()) == ip)
+          mac.second.setIsManager(true);
+        else
+          mac.second.setIsManager(false);
+      }
+
+      map_mutex.unlock();
+    }
+
     void removeMachine(string IP){
       map_mutex.lock();
       auto it = machines.find(IP);
