@@ -59,8 +59,14 @@ string getMacAddress(){
 }
 
 string getSelfIP(){
-  //Execute terminal command to get IP information
+  // Execute terminal command to get IP information
   string command = exec(R"(ip -4 addr | grep -oP '(?<=inet\s)192+(\.\d+){3}')");
+  
+  // Trim trailing whitespaces 
+  string whitespaces (" \t\f\v\n\r");
+  size_t last_non_whitespace = command.find_last_not_of(whitespaces);
+  if (last_non_whitespace != string::npos)
+    command.erase(last_non_whitespace + 1);
 
   return command;
 }
