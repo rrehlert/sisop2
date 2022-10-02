@@ -129,4 +129,14 @@ class Machine {
 			cout.width(18); cout << left << (participating == true ? "true" : "false");
 			cout.width(8); cout << left << (is_manager == true ? "MANAGER" : " ") << endl;
 		}
+
+		void printLog() {
+			cerr.width(3);  cerr << left << id;
+			cerr.width(25); cerr << left << hostname;
+			cerr.width(16); cerr << left << IP_addr;
+			cerr.width(18); cerr << left << mac_addr;
+			cerr.width(8); cerr << left << (status == AWAKE ? "awake" : "asleep");
+			cerr.width(5); cerr << left << (participating == true ? "true" : "false");
+			cerr.width(8);  cerr << left << (is_manager == true ? "MANAGER" : " ") << endl;
+		}
 };
