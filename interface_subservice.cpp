@@ -59,17 +59,20 @@ void read_CLI(){
             sendExitPacket();
             exit(0);
         }
-        if ((command.compare("WAKEUP") == 0 && manager == true)){
+        else if ((command.compare("WAKEUP") == 0 && manager == true)){
             cin >> command;
             wakeupParticipant(command);
         }
-        if ((command.compare("MANAGER") == 0 && manager == false)){
+        else if ((command.compare("MANAGER") == 0 && manager == false)){
             cout << " Turning into MANAGER" << endl;
             becomeManager();
         }
-        if ((command.compare("PARTICIPANT") == 0 && manager == true)){
+        else if ((command.compare("PARTICIPANT") == 0 && manager == true)){
             cout << " Turning into PARTICIPANT" << endl;
             becomeParticipant();
+        }
+        else {
+            cout << "Invalid command!" << endl;
         }
     }
 }
