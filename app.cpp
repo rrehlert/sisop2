@@ -19,9 +19,6 @@ int main(int argc, char *argv[]) {
 
 	while(true) {
 
-    // CLI Subservice
-    thread (read_CLI).detach();
-
     if (manager == false) {
       system("clear");
       cout << "Role: Participant" << endl;
@@ -35,6 +32,7 @@ int main(int argc, char *argv[]) {
       thread (listenForReplicationPackets).detach();
 
       // Interface Subservice
+      thread (read_CLI).detach();
       thread (updateParticipantInterface).detach();
     }
     while(!manager) {}
@@ -58,6 +56,7 @@ int main(int argc, char *argv[]) {
         thread (exitListener).detach();
 
         // Interface Subservice
+        thread (read_CLI).detach();
         thread (updateManagerInterface).detach();
     }
     while(manager) {}
