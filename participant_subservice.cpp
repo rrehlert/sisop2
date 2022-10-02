@@ -22,6 +22,7 @@ using namespace std;
 string manager_ip = "", manager_mac = "", manager_hostname = "";
 bool manager_changed = false;
 extern bool manager;
+bool keep_monitoring = true;
 
 void becomeManager(){
   manager = true;
@@ -83,32 +84,34 @@ void monitorateManagerStatus() {
     sleep(1);
   }
 
-  ptcp_socket.setSendAddr(manager_ip, KEEPALIVE_PORT);
-  bool keep_monitoring = true;
-  while(keep_monitoring && !manager) {
+  while(!manager) {
+    missed_keepalives = 0;
+    while(keep_monitoring) {
+      ptcp_socket.setSendAddr(manager_ip, KEEPALIVE_PORT);
 
-    // Send packet querying the manager's status
-    send_res = ptcp_socket.sendMessage(mac_addr + hostname);
-    if (send_res < 0)
-      cerr << ("[P] ERROR sendto") << endl;
+      // Send packet querying the manager's status
+      send_res = ptcp_socket.sendMessage(mac_addr + hostname);
+      if (send_res < 0)
+        cerr << ("[P] ERROR sendto") << endl;
 
-    recv_res = ptcp_socket.receiveMessage();
-    if (recv_res < 0) {
-      missed_keepalives++;
-      cerr << "[P] Manager didn't answer. Missed keepalives: " << missed_keepalives << endl;
-      if (missed_keepalives >= MAX_MISSED_KEEPALIVES) {
-        // cout << "[P] Starting a Manager election" << endl;
-        startManagerElection();
-        // if (newManager == true) {becomeManager()} // IDEA
-        keep_monitoring = false;
+      recv_res = ptcp_socket.receiveMessage();
+      if (recv_res < 0) {
+        missed_keepalives++;
+        cerr << "[P] Manager didn't answer. Missed keepalives: " << missed_keepalives << endl;
+        if (missed_keepalives >= MAX_MISSED_KEEPALIVES) {
+          // cout << "[P] Starting a Manager election" << endl;
+          startManagerElection();
+          // if (newManager == true) {becomeManager()} // IDEA
+          keep_monitoring = false;
+        }
       }
-    }
-    else {
-      // cout << "[P] Manager " << IP << " answered: " << ptcp_socket.getBuffer() << endl;
-      missed_keepalives = 0;
-    }
+      else {
+        // cout << "[P] Manager " << IP << " answered: " << ptcp_socket.getBuffer() << endl;
+        missed_keepalives = 0;
+      }
 
-    sleep(KEEPALIVE_INTERVAL);
+      sleep(KEEPALIVE_INTERVAL);
+    }
   }
   ptcp_socket.closeSocket();
   cerr << "[P] Exiting monitorateManagerStatus thread" << endl;

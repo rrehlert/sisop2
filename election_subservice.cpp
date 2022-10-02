@@ -22,20 +22,30 @@ bool isOnElection = false;
 bool answered = false;
 map <int, Timeout> timeoutMap;
 extern bool manager;
+extern bool keep_monitoring;
 
 
 void sendStartElectionPacket(string ip) {
   Socket socket;
   socket.setSendAddr(ip, ELECTION_PORT);
 
-  //Send start election to the specified port
+  //Send Start Election to the specified port
   cerr << "[E] Sending [SE] to " << ip << endl;
   socket.sendMessage("[SE]");
 }
 
+void sendAnswerElectionPacket(string ip) {
+  Socket socket;
+  socket.setSendAddr(ip, ELECTION_PORT);
+
+  //Send Answer Election to the specified port
+  cerr << "[E] Sending [AE] to " << ip << endl;
+  socket.sendMessage("[AE]");
+}
+
 void sendElectedManagerPackets(string elected_ip) {
   Socket socket;
-  
+
   auto vec = MachinesManager::Instance().getVectorOfMachines();
 
   for (Machine mac : vec) {
@@ -103,12 +113,14 @@ void electedManagerHandler(string buffer) {
   string myIp = getSelfIP();
   int myId = MachinesManager::Instance().getMachineId(myIp);
 
-  string ip = buffer.substr(5);
+  string ip = buffer.substr(4);
   int id = MachinesManager::Instance().getMachineId(ip);
 
+  isOnElection = false;
   if (id > myId) {
     cerr << "[E] New manager accepted: " << id << endl;
     MachinesManager::Instance().setNewManager(ip);
+    keep_monitoring = true;
   }
   else {
     cerr << "[E] New manager rejected: " << id << endl;
@@ -136,32 +148,31 @@ void listenForElectionPackets() {
 
   socket.listenPort(ELECTION_PORT);
 
-  while(true) {
+  while(!manager) {
     // Listen for election packets
-    recv_res = socket.receiveMessage(true);
+    recv_res = socket.receiveMessage();
     if (recv_res < 0){
       //cerr << "[R] ERROR recvfrom" << endl;
-      continue;
+      // continue;
     }
+    if (recv_res > 0) {
+      string buffer = socket.getBuffer();
+      // log
+      cerr << "[E] Packet received: " << buffer << endl;
 
-    string buffer = socket.getBuffer();
-    // log
-    cerr << "[E] Packet received: " << buffer << endl;
-
-    // start election packet ([SE])
-    if (buffer.substr(0, 4) == "[SE]") {
-      send_res = socket.sendMessageToSender("[AE]");
-      if (send_res < 0)
-        cerr << "[R] ERROR sendto" << endl;
-      startElectionHandler();
-    }
-    // answer election packet ([AE])
-    else if (buffer.substr(0, 4) == "[AE]") {
-      answerElectionHandler();
-    }
-    // elected manager packet ([EM])
-    else {
-      electedManagerHandler(buffer);
+      // start election packet ([SE])
+      if (buffer.substr(0, 4) == "[SE]") {
+        sendAnswerElectionPacket(socket.getSenderIP());
+        startElectionHandler();
+      }
+      // answer election packet ([AE])
+      else if (buffer.substr(0, 4) == "[AE]") {
+        answerElectionHandler();
+      }
+      // elected manager packet ([EM])
+      else {
+        electedManagerHandler(buffer);
+      }
     }
   }
   socket.closeSocket();
