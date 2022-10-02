@@ -216,7 +216,8 @@ void listenForReplicationPackets() {
     }
 
     string buffer = ptcp_socket.getBuffer();
-    // cout << "Rep msg: " << buffer << endl;
+    // log
+    cerr << "[R] Rep msg: " << buffer << endl;
 
     // new participant
     if (buffer.substr(0, 4) == "[NP]") {
@@ -235,8 +236,10 @@ void listenForReplicationPackets() {
     // Answers the packet received
     send_res = ptcp_socket.sendMessageToSender("Received");
     if (send_res < 0)
+      // log
       cerr << "[R] ERROR sendto" << endl;
   }
   ptcp_socket.closeSocket();
-  //cout << "Exiting Thread 3";
+  // log
+  cerr << "[R] Exiting listenForReplicationPackets thread" << endl;
 }

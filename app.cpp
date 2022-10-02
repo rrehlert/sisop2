@@ -14,49 +14,53 @@ bool manager = false;
 
 int main(int argc, char *argv[]) {
 
-//	if (argc > 1 && (string)argv[1] == "manager")
-//    manager = true;
-	while(true){
-	if (manager == false) {
-		system("clear");
-		cout << "Role: Participant" << endl;
-		cout << "No manager found yet" << endl;
+  // redirect log messages to a file
+  freopen("log.txt", "w", stderr);
 
-		// Participant Subservice
-		thread (listenForServicePackets).detach();
-		thread (monitorateManagerStatus).detach();
+	while(true) {
 
-		// Replication Subservice
-		thread (listenForReplicationPackets).detach();
+    // CLI Subservice
+    thread (read_CLI).detach();
 
-		// CLI Subservice
-		thread (read_CLI).detach();
-		thread (updateParticipantInterface).detach();
-	}
-	while(!manager) {}
-	if (manager == true) {
-			cout << "ENTERING MANAGER" << endl;
-			system("clear");
-			cout << "Role: Manager" << endl;
-			cout << "No participants found yet" << endl;
+    if (manager == false) {
+      system("clear");
+      cout << "Role: Participant" << endl;
+      cout << "No manager found yet" << endl;
 
-			// Manager Subservice
-			thread (listenForKeepalives).detach();
+      // Participant Subservice
+      thread (listenForServicePackets).detach();
+      thread (monitorateManagerStatus).detach();
 
-			// Discovery Subservice
-			thread (discoverParticipants).detach();
+      // Replication Subservice
+      thread (listenForReplicationPackets).detach();
 
-			// Listen when manager is awaken
-			thread (magicListener).detach();
+      // Interface Subservice
+      thread (updateParticipantInterface).detach();
+    }
+    while(!manager) {}
+    if (manager == true) {
+        // log
+        cerr << "Becoming manager" << endl;
+        system("clear");
+        cout << "Role: Manager" << endl;
+        cout << "No participants found yet" << endl;
 
-			// Exit Handler Subservice
-			thread (exitListener).detach();
+        // Manager Subservice
+        thread (listenForKeepalives).detach();
 
-			// CLI Subservice
-			//thread (read_CLI).detach();
-			thread (updateManagerInterface).detach();
-  		}
-	while(manager) {}
+        // Discovery Subservice
+        thread (discoverParticipants).detach();
+
+        // Listen when manager is awaken
+        thread (magicListener).detach();
+
+        // Exit Handler Subservice
+        thread (exitListener).detach();
+
+        // Interface Subservice
+        thread (updateManagerInterface).detach();
+    }
+    while(manager) {}
 	}
 	return 0;
 }

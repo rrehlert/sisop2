@@ -32,7 +32,7 @@ void listenForServicePackets() {
   string mac_addr = getMacAddress();
   string hostname = getSelfHostname();
 
-  ptcp_socket.setTimeoutOpt();
+  // ptcp_socket.setTimeoutOpt();
   ptcp_socket.listenPort(PORT);
 
   while(!manager) {
@@ -40,38 +40,35 @@ void listenForServicePackets() {
     //   continue;
     // Listen for packets sent by the manager to PORT
 
-    recv_res = ptcp_socket.receiveMessage(true);
-    if (recv_res < 0){
-      //cerr << "[P] ERROR recvfrom" << endl;
-      //cout << recv_res << endl;
-      continue;
+    recv_res = ptcp_socket.receiveMessage();
+    if (recv_res > 0) {
+      // cerr << "[P] Manager (IP " << ptcp_socket.getSenderIP() << ") asked: " << ptcp_socket.getBuffer() << endl;
+
+      // Get manager infos
+      string received_ip = ptcp_socket.getSenderIP();
+      string buffer = ptcp_socket.getBuffer();
+      string received_mac =  buffer.substr(0,17);
+      string received_hostname = buffer.substr(17);
+
+      if (manager_ip != received_ip || manager_mac != received_mac || manager_hostname != received_hostname) {
+        manager_ip = received_ip;
+        manager_mac = received_mac;
+        manager_hostname = received_hostname;
+        manager_changed = true;
+      }
+
+      // Answers the packet received
+      send_res = ptcp_socket.sendMessageToSender(mac_addr + hostname);
+      if (send_res < 0)
+        cerr << "[P] ERROR sendto" << endl;
     }
-    // cout << "[P] Manager (IP " << ptcp_socket.getSenderIP() << " ) asked: " << ptcp_socket.getBuffer() << endl;
-
-    // Get manager infos
-    string received_ip = ptcp_socket.getSenderIP();
-    string buffer = ptcp_socket.getBuffer();
-    string received_mac =  buffer.substr(0,17);
-    string received_hostname = buffer.substr(17);
-
-    if (manager_ip != received_ip || manager_mac != received_mac || manager_hostname != received_hostname) {
-      manager_ip = received_ip;
-      manager_mac = received_mac;
-      manager_hostname = received_hostname;
-      manager_changed = true;
-    }
-
-    // Answers the packet received
-    send_res = ptcp_socket.sendMessageToSender(mac_addr + hostname);
-    if (send_res < 0)
-      cerr << "[P] ERROR sendto" << endl;
   }
   ptcp_socket.closeSocket();
-  //cout << "Exiting Thread 1";
+  cerr << "[P] Exiting listenForServicePackets thread" << endl;
 }
 
 void startManagerElection() {
-  cout << "[P] I'm starting a Manager election" << endl;
+  cerr << "[P] I'm starting a Manager election" << endl;
 }
 
 void monitorateManagerStatus() {
@@ -119,7 +116,7 @@ void monitorateManagerStatus() {
     }
   }
   ptcp_socket.closeSocket();
-  //cout << "Exiting Thread 2";
+  cerr << "[P] Exiting monitorateManagerStatus thread" << endl;
 }
 
 void sendExitPacket(){
