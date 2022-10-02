@@ -11,43 +11,43 @@ using namespace std;
 
 
 string exec(string command) {
-   char buffer[128];
-   string result = "";
+  char buffer[128];
+  string result = "";
 
-   // Open pipe to file
-   FILE* pipe = popen(command.c_str(), "r");
-   if (!pipe) {
-      return "popen failed!";
-   }
+  // Open pipe to file
+  FILE* pipe = popen(command.c_str(), "r");
+  if (!pipe) {
+    return "popen failed!";
+  }
 
-   // read till end of process:
-   while (!feof(pipe)) {
+  // read till end of process:
+  while (!feof(pipe)) {
 
-      // use buffer to read and add to result
-      if (fgets(buffer, 128, pipe) != NULL)
-         result += buffer;
-   }
+    // use buffer to read and add to result
+    if (fgets(buffer, 128, pipe) != NULL)
+      result += buffer;
+  }
 
-   pclose(pipe);
-   return result;
+  pclose(pipe);
+  return result;
 }
 
 
 string getSelfHostname(){
-    ifstream file;
-    string path = "/etc/hostname";
-    string hostname = "";
-    file.open(path);
-    if(!file.fail())
-        file >> hostname;
-    return hostname;
+  ifstream file;
+  string path = "/etc/hostname";
+  string hostname = "";
+  file.open(path);
+  if(!file.fail())
+    file >> hostname;
+  return hostname;
 }
 
 string getMacAddress(){
   string command; 
   string mac;
 
-  //Execute terminal command to get ethernet informantion
+  //Execute terminal command to get ethernet information
   command = exec("ip a | grep -A1 enp");
   if(command.length() == 0)
     command = exec("ip a | grep -A1 eth0");
@@ -56,4 +56,11 @@ string getMacAddress(){
   //Scan for mac address
   mac = command.substr(pos+11, 17);
   return mac;
+}
+
+string getSelfIP(){
+  //Execute terminal command to get IP information
+  string command = exec(R"(ip -4 addr | grep -oP '(?<=inet\s)192+(\.\d+){3}')");
+
+  return command;
 }
