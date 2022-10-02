@@ -7,6 +7,7 @@
 #include "manager_subservice.cpp"
 #include "interface_subservice.cpp"
 #include "replication_subservice.cpp"
+#include "election_subservice.cpp"
 
 using namespace std;
 
@@ -30,6 +31,9 @@ int main(int argc, char *argv[]) {
 
       // Replication Subservice
       thread (listenForReplicationPackets).detach();
+
+      // Election Subservice
+      thread (listenForElectionPackets).detach();
 
       // Interface Subservice
       thread (read_CLI).detach();

@@ -20,55 +20,44 @@ using namespace std;
 
 bool isOnElection = false;
 map <int, Timeout> timeoutMap;
-void listenForElectionPackets() {
-  Socket ptcp_socket;
-  int send_res, recv_res;
 
-  ptcp_socket.setTimeoutOpt();
-  ptcp_socket.listenPort(ELECTION_PORT);
 
-  while(true) {
-    // Listen for election packets
-    recv_res = ptcp_socket.receiveMessage(true);
-    if (recv_res < 0){
-      //cerr << "[R] ERROR recvfrom" << endl;
-      continue;
-    }
+void sendStartElectionPacket(string ip) {
+  Socket socket;
+  socket.setSendAddr(ip, ELECTION_PORT);
 
-    string buffer = ptcp_socket.getBuffer();
-    // cout << "Rep msg: " << buffer << endl;
+  //Send start election to the specified port
+  socket.sendMessage("[SE]");
+}
 
-    // start election packet ([SE])
-    if (buffer.substr(0, 4) == "[SE]") {
-      send_res = ptcp_socket.sendMessageToSender("[AE]");
-      if (send_res < 0)
-        cerr << "[R] ERROR sendto" << endl;
-      startElectionHandler();
-    }
-    // answer election packet ([AE])
-    else if (buffer.substr(0, 4) == "[AE]") {
-      answerElectionHandler();
-    }
-    // elected manager packet ([EM])
-    else {
-      electedManagerHandler(buffer);
-    }
+void sendElectedManagerPackets(string elected_ip) {
+  Socket socket;
+  
+  auto vec = MachinesManager::Instance().getVectorOfMachines();
 
-    MachinesManager::Instance().setMapChanged(true);
-
-    // Answers the packet received
-    send_res = ptcp_socket.sendMessageToSender("Received");
-    if (send_res < 0)
-      cerr << "[R] ERROR sendto" << endl;
+  for (Machine mac : vec){
+    socket.setSendAddr(mac.getIP(), ELECTION_PORT);
+    socket.sendMessage("[EM]" + elected_ip);
   }
-  ptcp_socket.closeSocket();
-  //cout << "Exiting Thread 3";
+}
+
+void startManagerElection() {
+  string ip = getSelfIP();
+  int myId = MachinesManager::Instance().getMachineId(ip);
+
+  // log
+  cerr << "[E] Starting manager election" << endl;
+
+  auto vec = MachinesManager::Instance().getVectorOfMachines();
+  for (Machine mac : vec){
+    if (mac.getID() > myId)
+      sendStartElectionPacket(mac.getIP());
+  }
 }
 
 void answerElectionHandler() {
   string ip = getSelfIP();
-  auto myMachine =  MachinesManager::Instance().getMachine(ip);
-  int myId = myMachine->second.getID();
+  int myId = MachinesManager::Instance().getMachineId(ip);
   timeoutMap[myId].stop();
 
   // comecar o timeout T'
@@ -77,16 +66,21 @@ void answerElectionHandler() {
 
 void electedManagerHandler(string buffer) {
   string myIp = getSelfIP();
-  auto myMachine =  MachinesManager::Instance().getMachine(myIp);
-  int myId = myMachine->second.getID();
+  int myId = MachinesManager::Instance().getMachineId(myIp);
 
   string ip = buffer.substr(5);
-  auto machine =  MachinesManager::Instance().getMachine(ip);
-  int id = machine->second.getID();
+  int id = MachinesManager::Instance().getMachineId(ip);
 
   if (id > myId) {
     MachinesManager::Instance().setNewManager(ip);
   }
+  else {
+    becomeManager();
+    MachinesManager::Instance().setNewManager(myIp);
+    sendElectedManagerPackets(myIp);
+  }
+
+  MachinesManager::Instance().setMapChanged(true);
 
   // Se id recebido é maior que o proprio
   //   atualiza a tabela
@@ -128,21 +122,40 @@ void startElectionHandler() {
   }
 }
 
-void sendStartElectionPacket(string ip) {
-  Socket election_socket;
-  election_socket.setSendAddr(ip, ELECTION_PORT);
+void listenForElectionPackets() {
+  Socket socket;
+  int send_res, recv_res;
 
-  //Send start election to he specified port
-  election_socket.sendMessage("[SE]");
-}
+  socket.listenPort(ELECTION_PORT);
 
-void sendElectedManagerPackets(string elected_ip) {
-  Socket election_socket;
-  
-  auto vec = MachinesManager::Instance().getVectorOfMachines();
+  while(true) {
+    // Listen for election packets
+    recv_res = socket.receiveMessage(true);
+    if (recv_res < 0){
+      //cerr << "[R] ERROR recvfrom" << endl;
+      continue;
+    }
 
-  for (Machine mac : vec){
-    election_socket.setSendAddr(mac.getIP(), ELECTION_PORT);
-    election_socket.sendMessage("[EM]" + elected_ip);
+    string buffer = socket.getBuffer();
+    // log
+    cerr << "Election msg: " << buffer << endl;
+
+    // start election packet ([SE])
+    if (buffer.substr(0, 4) == "[SE]") {
+      send_res = socket.sendMessageToSender("[AE]");
+      if (send_res < 0)
+        cerr << "[R] ERROR sendto" << endl;
+      startElectionHandler();
+    }
+    // answer election packet ([AE])
+    else if (buffer.substr(0, 4) == "[AE]") {
+      answerElectionHandler();
+    }
+    // elected manager packet ([EM])
+    else {
+      electedManagerHandler(buffer);
+    }
   }
+  socket.closeSocket();
+  cerr << "Exiting listenForElectionPackets thread" << endl;
 }

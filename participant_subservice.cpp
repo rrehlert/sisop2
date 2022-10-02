@@ -8,6 +8,7 @@
 
 #include "socket.cpp"
 #include "information_subservice.cpp"
+#include "election_subservice.cpp"
 
 #define PORT 4000
 #define EXIT_PORT 4001
@@ -65,10 +66,6 @@ void listenForServicePackets() {
   }
   ptcp_socket.closeSocket();
   cerr << "[P] Exiting listenForServicePackets thread" << endl;
-}
-
-void startManagerElection() {
-  cerr << "[P] I'm starting a Manager election" << endl;
 }
 
 void monitorateManagerStatus() {
