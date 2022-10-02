@@ -22,6 +22,10 @@ string manager_ip = "", manager_mac = "", manager_hostname = "";
 bool manager_changed = false;
 extern bool manager;
 
+void becomeManager(){
+  manager = true;
+}
+
 void listenForServicePackets() {
   Socket ptcp_socket;
   int send_res, recv_res;
@@ -79,10 +83,9 @@ void monitorateManagerStatus() {
   // Wait for the discovery of a manager
   while(manager_ip == "" && !manager) {
     // cout << "[P] Manager not known yet" << endl;
-    // manager_discovery_count++ // IDEA
-    // if(manager_discovery_count >= MAX_MISSED_DISCOVERY) // IDEA
-    // startManagerElection(); // IDEA
-    //
+    manager_discovery_count++;
+    if(manager_discovery_count >= MAX_MISSED_DISCOVERY)
+      becomeManager();
     sleep(1);
   }
 
@@ -124,8 +127,4 @@ void sendExitPacket(){
   exit_socket.setSendAddr(manager_ip, EXIT_PORT);
   //Send exit message to specified exit port
   int exit_message = exit_socket.sendMessage("sleep service exit");
-}
-
-void becomeManager(){
-  manager = true;
 }
