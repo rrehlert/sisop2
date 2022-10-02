@@ -19,7 +19,9 @@
 using namespace std;
 
 bool isOnElection = false;
+bool answered = false;
 map <int, Timeout> timeoutMap;
+extern bool manager;
 
 
 void sendStartElectionPacket(string ip) {
@@ -27,6 +29,7 @@ void sendStartElectionPacket(string ip) {
   socket.setSendAddr(ip, ELECTION_PORT);
 
   //Send start election to the specified port
+  cerr << "[E] Sending [SE] to " << ip << endl;
   socket.sendMessage("[SE]");
 }
 
@@ -35,30 +38,62 @@ void sendElectedManagerPackets(string elected_ip) {
   
   auto vec = MachinesManager::Instance().getVectorOfMachines();
 
-  for (Machine mac : vec){
-    socket.setSendAddr(mac.getIP(), ELECTION_PORT);
-    socket.sendMessage("[EM]" + elected_ip);
+  for (Machine mac : vec) {
+    if (mac.getIP() != elected_ip) {
+      cerr << "[E] Sending [EM]" << elected_ip << " to " << mac.getIP() << endl;
+      socket.setSendAddr(mac.getIP(), ELECTION_PORT);
+      socket.sendMessage("[EM]" + elected_ip);
+    }
   }
 }
 
 void startManagerElection() {
-  string ip = getSelfIP();
-  int myId = MachinesManager::Instance().getMachineId(ip);
+  if (isOnElection == false) {
+    isOnElection = true;
+    string myIp = getSelfIP();
+    int myId = MachinesManager::Instance().getMachineId(myIp);
 
-  // log
-  cerr << "[E] Starting manager election" << endl;
+    // log
+    cerr << "[E] Starting manager election" << endl;
 
-  auto vec = MachinesManager::Instance().getVectorOfMachines();
-  for (Machine mac : vec){
-    if (mac.getID() > myId)
-      sendStartElectionPacket(mac.getIP());
+    auto vec = MachinesManager::Instance().getVectorOfMachines();
+    for (Machine mac : vec){
+      if (mac.getID() > myId)
+        sendStartElectionPacket(mac.getIP());
+    }
+
+    answered = false;
+    timeoutMap[myId] = Timeout(myId, 5);
+
+    int count = 0;
+    while(!answered && count < timeoutMap[myId].duration) {
+      sleep(1);
+      count++;
+      cerr << "[E] Timeout T, count: " << count << endl;
+    }
+
+    // if timeout completed
+    if ( count == timeoutMap[myId].duration) {
+      cerr << "[E] timeout T completed. Electing myself." << endl;
+      manager = true;
+      isOnElection = false;
+      sendElectedManagerPackets(myIp);
+      MachinesManager::Instance().setNewManager(myIp);
+    }
+    // if not completed, the next steps will be executed by answerElectionHandler()
+  }
+  // already on election
+  else {
+    cerr << "[E] Already on election, will not start a new one." << endl;
   }
 }
 
 void answerElectionHandler() {
-  string ip = getSelfIP();
-  int myId = MachinesManager::Instance().getMachineId(ip);
-  timeoutMap[myId].stop();
+  string myIp = getSelfIP();
+  int myId = MachinesManager::Instance().getMachineId(myIp);
+
+  answered = true;
+  // timeoutMap[myId].stop();
 
   // comecar o timeout T'
   // reinicia election e seta isOnElection de todos pra false
@@ -72,10 +107,12 @@ void electedManagerHandler(string buffer) {
   int id = MachinesManager::Instance().getMachineId(ip);
 
   if (id > myId) {
+    cerr << "[E] New manager accepted: " << id << endl;
     MachinesManager::Instance().setNewManager(ip);
   }
   else {
-    becomeManager();
+    cerr << "[E] New manager rejected: " << id << endl;
+    manager = true;
     MachinesManager::Instance().setNewManager(myIp);
     sendElectedManagerPackets(myIp);
   }
@@ -90,36 +127,7 @@ void electedManagerHandler(string buffer) {
 }
 
 void startElectionHandler() {
-  if (isOnElection == false) {
-    isOnElection = true;
-    string ip = getSelfIP();
-    auto myMachine =  MachinesManager::Instance().getMachine(ip);
-    int myId = myMachine->second.getID();
-
-    auto vec = MachinesManager::Instance().getVectorOfMachines();
-    for (Machine mac : vec){
-      if (mac.getID() > myId)
-        sendStartElectionPacket(mac.getIP());
-    }
-
-   timeoutMap[myId] = Timeout(myId, 5);
-
-    // If timeout ocurred
-    int count = 0;
-
-    while(timeoutMap[myId].running == true || count < timeoutMap[myId].duration) {
-      sleep(1);
-      count++;
-   
-    }
-
-    // if not stopped
-    if ( timeoutMap[myId].running == true) {
-      becomeManager();
-      sendElectedManagerPackets(ip);
-    }
-    // if stopped, this will be handled by answerElectionHandler().
-  }
+  startManagerElection();
 }
 
 void listenForElectionPackets() {
@@ -138,7 +146,7 @@ void listenForElectionPackets() {
 
     string buffer = socket.getBuffer();
     // log
-    cerr << "Election msg: " << buffer << endl;
+    cerr << "[E] Packet received: " << buffer << endl;
 
     // start election packet ([SE])
     if (buffer.substr(0, 4) == "[SE]") {
