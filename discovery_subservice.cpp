@@ -63,7 +63,7 @@ void discoverParticipants() {
         auto machine = MachinesManager::Instance().getMachine(IP_addr);
         // Set machine to be monitorated again
         if (machine->second.isParticipating() == false) {
-          if (machine->second.getCount() >= 2){
+          if (machine->second.getCount() >= 1){
             // cout << "[D] Machine " << IP_addr << " is being monitorated again" << endl;
             machine->second.setParticipating(true);
             MachinesManager::Instance().setMapChanged(true);

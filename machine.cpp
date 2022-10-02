@@ -22,7 +22,7 @@ class Machine {
   public:
 		Machine(){};
 
-		Machine(int _id, string IP, string mac, string _hostname, int _status = AWAKE, bool _participating = false) {
+		Machine(int _id, string IP, string mac, string _hostname, int _status = AWAKE, bool _participating = true) {
 			id = _id;
 			hostname = _hostname;
 			IP_addr = IP;
