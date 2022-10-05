@@ -81,7 +81,7 @@ void monitorateManagerStatus() {
     manager_discovery_count++;
     cerr << "[P] Manager not found. Count: " << manager_discovery_count << endl;
     if(manager_discovery_count >= MAX_MISSED_DISCOVERY)
-      becomeManager();
+      startManagerElection();
     sleep(1);
   }
 

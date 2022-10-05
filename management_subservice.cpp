@@ -90,7 +90,6 @@ class MachinesManager {
       machines[IP] = mach;
       map_mutex.unlock();
       next_id = ID + 1;
-      cerr << "NEXT ID: " << next_id << endl;
     }
 
     auto getMachineByHostname(string hostname) {
