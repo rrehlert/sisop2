@@ -21,9 +21,12 @@ using namespace std;
 void addParticipantsFromTable(){
   vector<Machine> machines_vec = MachinesManager::Instance().getVectorOfMachines();
   for (Machine mac : machines_vec){
-    thread (monitorateParticipant, mac.getIP()).detach();
-    cerr << "[D] Machine " << mac.getIP() << " loaded from table" << endl;
+    if (mac.getIP() != getSelfIP()) {
+      thread (monitorateParticipant, mac.getIP()).detach();
+      cerr << "[D] Machine " << mac.getIP() << " loaded from table" << endl;
+    }
   }
+  MachinesManager::Instance().setMapChanged(true);
 }
 
 
