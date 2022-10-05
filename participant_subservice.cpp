@@ -79,6 +79,7 @@ void monitorateManagerStatus() {
   while(manager_ip == "" && !manager) {
     // cout << "[P] Manager not known yet" << endl;
     manager_discovery_count++;
+    cerr << "[P] Manager not found. Count: " << manager_discovery_count << endl;
     if(manager_discovery_count >= MAX_MISSED_DISCOVERY)
       becomeManager();
     sleep(1);

@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include <mutex>
+#include <algorithm>
 
 #include "machine.cpp"
 
@@ -17,7 +18,7 @@ class MachinesManager {
   private:
     map<string, Machine> machines;
     bool map_changed = false;
-    int next_id = 0;
+    int next_id = 1;
     string manager_ip = "";
     // Constructor and destructor must be private to ensure only one instance of the class
     // is created.
@@ -41,6 +42,10 @@ class MachinesManager {
 
     void setNextId(int new_val) {
       next_id = new_val;
+    }
+
+    int getNextId() {
+      return next_id;
     }
 
     void setMapChanged(bool new_status) {
@@ -70,21 +75,22 @@ class MachinesManager {
     }
 
     void createMachine(string IP, string mac, string hostname) {
-      incNextId();
       Machine mach(next_id, IP, mac, hostname);
       map_mutex.lock();
 
       machines[IP] = mach;
       map_mutex.unlock();
+      incNextId();
     }
 
     void createMachine(int ID, string IP, string mac, string hostname, int status) {
-      incNextId();
       Machine mach(ID, IP, mac, hostname, status);
       map_mutex.lock();
 
       machines[IP] = mach;
       map_mutex.unlock();
+      next_id = ID + 1;
+      cerr << "NEXT ID: " << next_id << endl;
     }
 
     auto getMachineByHostname(string hostname) {
@@ -134,6 +140,8 @@ class MachinesManager {
 
       map_mutex.unlock();
 
+      // sort by id
+      sort(vec.begin(), vec.end(), Machine::compareMachineIDs);
       return vec;
     }
 
@@ -141,10 +149,11 @@ class MachinesManager {
       map_mutex.lock();
 
       // unset the old manager, if there was one
-      if (manager_ip != "")
-        getMachine(manager_ip)->second.setIsManager(false);
+      if (manager_ip != "") {
+        machines.find(manager_ip)->second.setIsManager(false);
+      }
       // set the new manager
-      getMachine(ip)->second.setIsManager(true);
+      machines.find(ip)->second.setIsManager(true);
       manager_ip = ip;
 
       map_mutex.unlock();

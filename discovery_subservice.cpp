@@ -22,7 +22,7 @@ void addParticipantsFromTable(){
   vector<Machine> machines_vec = MachinesManager::Instance().getVectorOfMachines();
   for (Machine mac : machines_vec){
     thread (monitorateParticipant, mac.getIP()).detach();
-    cout << "machine " << mac.getIP() << "Loaded from table" << endl;
+    cerr << "[D] Machine " << mac.getIP() << " loaded from table" << endl;
   }
 }
 

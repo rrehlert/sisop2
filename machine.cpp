@@ -42,6 +42,10 @@ class Machine {
 			is_manager = m1.is_manager;
 		}
 
+		static bool compareMachineIDs(const Machine& m1, const Machine& m2) {
+			return (m1.id < m2.id);
+		}
+
 		int getID() {
 			return id;
 		}

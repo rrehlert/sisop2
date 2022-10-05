@@ -176,5 +176,5 @@ void listenForElectionPackets() {
     }
   }
   socket.closeSocket();
-  cerr << "Exiting listenForElectionPackets thread" << endl;
+  cerr << "[E] Exiting listenForElectionPackets thread" << endl;
 }

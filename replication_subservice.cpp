@@ -34,12 +34,11 @@ void initialReplicationFor(string IP_addr) {
     string mac_addr = it->getMac();
     string hostname = it->getHostname();
     string status = to_string(it->getStatus());
-    string participating = it->isParticipating() ? "1" : "0";
     string id = to_string(it->getID());
 
     // New Participant packet
     string msg = "[IR]" + mach_count_s;
-    msg += machine_IP + '|' + mac_addr + '|' + hostname + '|' + status + '|' + participating + '|' + id;
+    msg += machine_IP + '|' + mac_addr + '|' + hostname + '|' + status + '|' + id;
     send_res = mng_socket.sendMessage(msg);
     if (send_res < 0)
       cerr << ("[R] ERROR sendto") << endl;
@@ -148,11 +147,6 @@ void initialReplicationHandler(string message) {
   int status = stoi(status_s);
   int id = stoi(id_s);
   int mach_count = stoi(message.substr(mach_count_start, 1));
-
-  if (mach_count == 1) {
-    MachinesManager::Instance().setNextId(0);
-    // cout << "IR INITIATED!" << endl;
-  }
 
   // cout << "IR: " << IP_addr + ' ' + mac_addr + ' ' + hostname + ' ' + status_s + ' ' + id_s << endl;
   MachinesManager::Instance().createMachine(id, IP_addr, mac_addr, hostname, status);
