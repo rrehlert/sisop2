@@ -18,6 +18,7 @@ class MachinesManager {
     map<string, Machine> machines;
     bool map_changed = false;
     int next_id = 0;
+    string manager_ip = "";
     // Constructor and destructor must be private to ensure only one instance of the class
     // is created.
     MachinesManager() {}
@@ -139,12 +140,12 @@ class MachinesManager {
     void setNewManager(string ip) {
       map_mutex.lock();
 
-      for (auto mac : machines){
-        if ((mac.second.getIP()) == ip)
-          mac.second.setIsManager(true);
-        else
-          mac.second.setIsManager(false);
-      }
+      // unset the old manager, if there was one
+      if (manager_ip != "")
+        getMachine(manager_ip)->second.setIsManager(false);
+      // set the new manager
+      getMachine(ip)->second.setIsManager(true);
+      manager_ip = ip;
 
       map_mutex.unlock();
     }
