@@ -65,10 +65,10 @@ void discoverParticipants() {
         if (machine->second.isParticipating() == false) {
           if (machine->second.getCount() >= 1){
             // cout << "[D] Machine " << IP_addr << " is being monitorated again" << endl;
-            machine->second.setParticipating(true);
+            machine->second.setAwake();
             MachinesManager::Instance().setMapChanged(true);
             initialReplicationFor(IP_addr);
-            replicateParticipatingStatus(IP_addr);
+            replicateAwakeStatus(IP_addr);
             // Monitoring Subservice
             thread (monitorateParticipant, IP_addr).detach();
           }

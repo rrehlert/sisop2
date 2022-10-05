@@ -107,11 +107,6 @@ void replicateAsleepStatus(string IP_addr) {
   replicateNewStatus(IP_addr, "[AS]");
 }
 
-// Public method to replicate the Participating status of participant `IP_addr`.
-void replicateParticipatingStatus(string IP_addr) {
-  replicateNewStatus(IP_addr, "[PA]");
-}
-
 // Public method to replicate the exit of participant `IP_addr` from monitoring.
 void replicateExitStatus(string IP_addr) {
   replicateNewStatus(IP_addr, "[EX]");
@@ -136,13 +131,12 @@ void newParticipantHandler(string message) {
 // Parses the `message` to get data for a new participant, and creates it.
 // Although similar to newParticipantHandler, it's used for initial replication, so needs more info.
 // Expected format:
-// [IR][X/Y]IP_addr|mac_addr|hostname|status|participating
+// [IR][X/Y]IP_addr|mac_addr|hostname|status
 void initialReplicationHandler(string message) {
   int divider1 = message.find('|');
   int divider2 = message.find('|', divider1 + 1);
   int divider3 = message.find('|', divider2 + 1);
   int divider4 = message.find('|', divider3 + 1);
-  int divider5 = message.find('|', divider4 + 1);
 
   int data_start = message.find_last_of(']') + 1;
   int mach_count_start = message.find(']') + 2;
@@ -150,10 +144,8 @@ void initialReplicationHandler(string message) {
   string mac_addr = message.substr(divider1 + 1, divider2 - divider1 - 1);
   string hostname = message.substr(divider2 + 1, divider3 - divider2 - 1);
   string status_s = message.substr(divider3 + 1, divider4 - divider3 - 1);
-  string participating_s = message.substr(divider4 + 1, divider5 - divider4 - 1);
-  string id_s = message.substr(divider5 + 1);
+  string id_s = message.substr(divider4 + 1);
   int status = stoi(status_s);
-  bool participating = (participating_s == "1");
   int id = stoi(id_s);
   int mach_count = stoi(message.substr(mach_count_start, 1));
 
@@ -162,8 +154,8 @@ void initialReplicationHandler(string message) {
     // cout << "IR INITIATED!" << endl;
   }
 
-  // cout << "IR: " << IP_addr + ' ' + mac_addr + ' ' + hostname + ' ' + status_s + ' ' + participating_s + ' ' + id_s << endl;
-  MachinesManager::Instance().createMachine(id, IP_addr, mac_addr, hostname, status, participating);
+  // cout << "IR: " << IP_addr + ' ' + mac_addr + ' ' + hostname + ' ' + status_s + ' ' + id_s << endl;
+  MachinesManager::Instance().createMachine(id, IP_addr, mac_addr, hostname, status);
 }
 
 // Parses the `message` to get data for a new participant's status, and updates it.
@@ -181,9 +173,6 @@ void newStatusHandler(string message) {
   }
   else if (new_status == "[AS]") {
     machine->second.setAsleep();
-  }
-  else if (new_status == "[PA]") {
-    machine->second.setParticipating(true);
   }
   else if (new_status == "[EX]") {
     MachinesManager::Instance().removeMachine(IP_addr);

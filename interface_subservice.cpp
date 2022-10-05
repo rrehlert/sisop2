@@ -23,22 +23,22 @@ void signal_handler(int signum){
 }
 
 void printHeader(bool for_manager = true) {
-    cout.width(7); cout << left << "ID";
-    cout.width(25); cout << left << "Hostname";
-    cout.width(15); cout << left << "IP";
-    cout.width(21); cout << left << "Mac";
-    if (for_manager == true) {
-        cout.width(11); cout << left << "Status";
-        cout.width(13); cout << left << "Participating" << endl;
+    if (for_manager) {
+        cout.width(5); cout << left << "ID";
     }
-    else
-        cout << endl;
+    cout.width(25); cout << left << "Hostname";
+    cout.width(17); cout << left << "IP";
+    cout.width(20); cout << left << "MAC";
+    if (for_manager) {
+        cout.width(11); cout << left << "Status";
+    }
+    cout << endl;
 }
 
 void printManager() {
     cout.width(25); cout << left << manager_hostname;
-    cout.width(15); cout << left << manager_ip;
-    cout.width(21); cout << left << manager_mac << endl;
+    cout.width(17); cout << left << manager_ip;
+    cout.width(20); cout << left << manager_mac << endl;
 }
 
 void read_CLI(){

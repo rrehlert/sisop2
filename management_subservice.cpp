@@ -77,9 +77,9 @@ class MachinesManager {
       map_mutex.unlock();
     }
 
-    void createMachine(int ID, string IP, string mac, string hostname, int status, bool participating) {
+    void createMachine(int ID, string IP, string mac, string hostname, int status) {
       incNextId();
-      Machine mach(ID, IP, mac, hostname, status, participating);
+      Machine mach(ID, IP, mac, hostname, status);
       map_mutex.lock();
 
       machines[IP] = mach;
@@ -152,7 +152,7 @@ class MachinesManager {
     void removeMachine(string IP){
       map_mutex.lock();
       auto it = machines.find(IP);
-      it->second.setParticipating(false);
+      it->second.setOff();
       it->second.restoreCount();
 
       map_mutex.unlock();
