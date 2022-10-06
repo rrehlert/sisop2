@@ -114,3 +114,38 @@ void updateParticipantInterface() {
     }
     //cout << "Exiting Thread 4";
 }
+
+void updateInterface() {
+    while(true) {
+      if (manager) {
+        if (MachinesManager::Instance().mapChanged() == true) {
+          system("clear");
+          cout << "Role: Manager" << endl;
+          cout << "Participants:" << endl;
+          printHeader();
+          MachinesManager::Instance().printMachines();
+          MachinesManager::Instance().setMapChanged(false);
+        }
+      }
+      else {
+        if (manager_changed == true || MachinesManager::Instance().mapChanged() == true) {
+          system("clear");
+          cout << "Role: Participant" << endl;
+          cout << "Latest manager info:" << endl;
+          printHeader(false);
+          printManager();
+          manager_changed = false;
+
+          // REMOVE THIS FOR PRODUCTION
+          // Print machines table to supervise the replication
+          cout << '\n' << "Participants:" << endl;
+          printHeader();
+          MachinesManager::Instance().printMachines();
+          MachinesManager::Instance().setMapChanged(false);
+        }
+      }
+
+
+      sleep(POLL_INTERVAL);
+    }
+}

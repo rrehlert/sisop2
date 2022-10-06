@@ -95,13 +95,16 @@ class Socket {
 
     // Sets the address to listen to on receiveMessage().
     // Tipically used on the server side.
-    void listenPort(int port) {
+    int listenPort(int port) {
       listen_addr.sin_family = AF_INET;
       listen_addr.sin_port = htons(port);
       listen_addr.sin_addr.s_addr = INADDR_ANY;
 
-      if (bind(socket_fd, (struct sockaddr *) &listen_addr, sizeof(struct sockaddr)) < 0)
-			  cerr << "ERROR on binding" << endl;
+      int bind_res = bind(socket_fd, (struct sockaddr *) &listen_addr, sizeof(struct sockaddr));
+      if (bind_res < 0)
+			  cerr << "ERROR on binding to port " << port << endl;
+
+      return bind_res;
     }
 
     // Wrapper method around recvfrom. Stores the received message in buffer.

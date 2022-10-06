@@ -14,8 +14,9 @@
 #define EXIT_PORT 4001
 #define KEEPALIVE_PORT 4002
 #define MAX_MISSED_KEEPALIVES 3
-#define MAX_MISSED_DISCOVERY 3
+#define MAX_MISSED_DISCOVERY 10
 #define KEEPALIVE_INTERVAL 1
+#define BROADCAST_IP "255.255.255.255"
 
 using namespace std;
 
@@ -34,12 +35,15 @@ void listenForServicePackets() {
   string mac_addr = getMacAddress();
   string hostname = getSelfHostname();
 
+  cerr << "Entrando na listenForServicePackets" << endl;
+
   // ptcp_socket.setTimeoutOpt();
   ptcp_socket.listenPort(PORT);
 
-  while(!manager) {
-    // if (manager_ip == "")
-    //   continue;
+  while(true) {
+    if (manager) {
+      continue;
+    }
     // Listen for packets sent by the manager to PORT
 
     recv_res = ptcp_socket.receiveMessage();
@@ -51,6 +55,12 @@ void listenForServicePackets() {
       string buffer = ptcp_socket.getBuffer();
       string received_mac =  buffer.substr(0,17);
       string received_hostname = buffer.substr(17);
+
+      if (manager && received_ip != getSelfIP()) {
+        cerr << received_ip << " is another manager" << endl;
+        manager = false;
+        startManagerElection();
+      }
 
       if (manager_ip != received_ip || manager_mac != received_mac || manager_hostname != received_hostname) {
         manager_ip = received_ip;
@@ -70,7 +80,7 @@ void listenForServicePackets() {
 }
 
 void monitorateManagerStatus() {
-  Socket ptcp_socket;
+  Socket ptcp_socket, ptcp_socket2;
   int send_res, recv_res, missed_keepalives = 0, manager_discovery_count = 0;
   string mac_addr = getMacAddress();
   string hostname = getSelfHostname();
@@ -80,12 +90,18 @@ void monitorateManagerStatus() {
     // cout << "[P] Manager not known yet" << endl;
     manager_discovery_count++;
     cerr << "[P] Manager not found. Count: " << manager_discovery_count << endl;
-    if(manager_discovery_count >= MAX_MISSED_DISCOVERY)
+    if(manager_discovery_count >= MAX_MISSED_DISCOVERY) {
       startManagerElection();
+      MachinesManager::Instance().createMachine(getSelfIP(), mac_addr, hostname);
+      MachinesManager::Instance().setNewManager(getSelfIP());
+    }
     sleep(1);
   }
 
-  while(!manager) {
+  while(true) {
+    if (manager) {
+      continue;
+    }
     missed_keepalives = 0;
     while(keep_monitoring) {
       ptcp_socket.setSendAddr(manager_ip, KEEPALIVE_PORT);
@@ -100,6 +116,8 @@ void monitorateManagerStatus() {
         missed_keepalives++;
         cerr << "[P] Manager didn't answer. Missed keepalives: " << missed_keepalives << endl;
         if (missed_keepalives >= MAX_MISSED_KEEPALIVES) {
+          // ptcp_socket2.setBroadcastOpt();
+	        // ptcp_socket2.setSendAddr(BROADCAST_IP, PORT);
           // cout << "[P] Starting a Manager election" << endl;
           startManagerElection();
           // if (newManager == true) {becomeManager()} // IDEA

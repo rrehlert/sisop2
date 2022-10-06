@@ -9,6 +9,7 @@
 #define KEEPALIVE_PORT 4002
 
 using namespace std;
+extern bool manager;
 
 void listenForKeepalives() {
   Socket ptcp_socket;
@@ -16,10 +17,15 @@ void listenForKeepalives() {
   string mac_addr = getMacAddress();
   string hostname = getSelfHostname();
 
+  cerr << "Entrando na listenForKeepalives" << endl;
+
   ptcp_socket.setTimeoutOpt();
   ptcp_socket.listenPort(KEEPALIVE_PORT);
 
-  while(manager) {
+  while(true) {
+    if (!manager) {
+      continue;
+    }
     // Listen for Keepalive queries sent by the participants
     recv_res = ptcp_socket.receiveMessage(true);
     if (recv_res < 0)
@@ -44,10 +50,15 @@ void magicListener(){
   string mac_addr = getMacAddress();
   string hostname = getSelfHostname();
 
+  cerr << "Entrando na magicListener" << endl;
+
   ptcp_socket.setTimeoutOpt();
   ptcp_socket.listenPort(MAGIC_PORT);
 
-  while(manager) {
+  while(true) {
+    if (!manager) {
+      continue;
+    }
     // Listen for Keepalive queries sent by the participants
     recv_res = ptcp_socket.receiveMessage(true);
     if (recv_res < 0)

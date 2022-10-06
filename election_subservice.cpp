@@ -73,7 +73,7 @@ void startManagerElection() {
     }
 
     answered = false;
-    timeoutMap[myId] = Timeout(myId, 5);
+    timeoutMap[myId] = Timeout(myId, 3);
 
     int count = 0;
     while(!answered && count < timeoutMap[myId].duration) {
@@ -89,6 +89,7 @@ void startManagerElection() {
       isOnElection = false;
       sendElectedManagerPackets(myIp);
       MachinesManager::Instance().setNewManager(myIp);
+      MachinesManager::Instance().setMapChanged(true);
     }
     // if not completed, the next steps will be executed by answerElectionHandler()
   }
@@ -146,9 +147,14 @@ void listenForElectionPackets() {
   Socket socket;
   int send_res, recv_res;
 
+  cerr << "Entrando na listenForElectionPackets" << endl;
+
   socket.listenPort(ELECTION_PORT);
 
-  while(!manager) {
+  while(true) {
+    if (manager) {
+      continue;
+    }
     // Listen for election packets
     recv_res = socket.receiveMessage();
     if (recv_res < 0){

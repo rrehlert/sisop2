@@ -18,52 +18,46 @@ int main(int argc, char *argv[]) {
   // redirect log messages to a file
   freopen("log.txt", "w", stderr);
 
-	while(true) {
+  system("clear");
+  cout << "Role: Participant" << endl;
+  cout << "No manager found yet" << endl;
 
-    if (manager == false) {
-      system("clear");
-      cout << "Role: Participant" << endl;
-      cout << "No manager found yet" << endl;
+  // Participant Subservice
+  thread (listenForServicePackets).detach();
+  thread (monitorateManagerStatus).detach();
 
-      // Participant Subservice
-      thread (listenForServicePackets).detach();
-      thread (monitorateManagerStatus).detach();
+  // Replication Subservice
+  thread (listenForReplicationPackets).detach();
 
-      // Replication Subservice
-      thread (listenForReplicationPackets).detach();
+  // Election Subservice
+  thread (listenForElectionPackets).detach();
 
-      // Election Subservice
-      thread (listenForElectionPackets).detach();
+  // Interface Subservice
+  thread (read_CLI).detach();
+  thread (updateInterface).detach();
+// while(!manager) {}
+  // log
+  // cerr << "Becoming manager" << endl;
+  // system("clear");
+  // cout << "Role: Manager" << endl;
+  // cout << "No participants found yet" << endl;
 
-      // Interface Subservice
-      thread (read_CLI).detach();
-      thread (updateParticipantInterface).detach();
-    }
-    while(!manager) {}
-    if (manager == true) {
-        // log
-        cerr << "Becoming manager" << endl;
-        system("clear");
-        cout << "Role: Manager" << endl;
-        cout << "No participants found yet" << endl;
+  // Manager Subservice
+  thread (listenForKeepalives).detach();
 
-        // Manager Subservice
-        thread (listenForKeepalives).detach();
+  // Discovery Subservice
+  thread (discoverParticipants).detach();
 
-        // Discovery Subservice
-        thread (discoverParticipants).detach();
+  // Listen when manager is awaken
+  thread (magicListener).detach();
 
-        // Listen when manager is awaken
-        thread (magicListener).detach();
+  // Exit Handler Subservice
+  thread (exitListener).detach();
 
-        // Exit Handler Subservice
-        thread (exitListener).detach();
+  // Interface Subservice
+  // thread (read_CLI).detach();
+  // thread (updateManagerInterface).detach();
+  while(true) {};
 
-        // Interface Subservice
-        thread (read_CLI).detach();
-        thread (updateManagerInterface).detach();
-    }
-    while(manager) {}
-	}
 	return 0;
 }

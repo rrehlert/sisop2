@@ -70,7 +70,10 @@ void exitListener(){
 
   exit_socket.listenPort(EXIT_PORT);
 
-  while(manager) {
+  while(true) {
+    if (!manager) {
+      continue;
+    }
     // Listen for packets sent by the manager to PORT
     recv_res = exit_socket.receiveMessage(true);
     if (recv_res < 0)

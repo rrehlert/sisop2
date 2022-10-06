@@ -42,7 +42,10 @@ void discoverParticipants() {
 
   addParticipantsFromTable();
 
-  while(manager) {
+  while(true) {
+    if (!manager) {
+      continue;
+    }
     // Send packet looking for participants
     send_res = mng_socket.sendMessage(mac_addr + hostname);
     if (send_res < 0)
@@ -67,7 +70,7 @@ void discoverParticipants() {
         // Set machine to be monitorated again
         if (machine->second.isParticipating() == false) {
           if (machine->second.getCount() >= 1){
-            // cout << "[D] Machine " << IP_addr << " is being monitorated again" << endl;
+            cerr << "[D] Machine " << IP_addr << " is being monitorated again" << endl;
             machine->second.setAwake();
             MachinesManager::Instance().setMapChanged(true);
             initialReplicationFor(IP_addr);
@@ -81,14 +84,16 @@ void discoverParticipants() {
         }
       }
       else {
-        // cout << "[D] Machine is unknown! Adding to the map \n" << endl;
-        MachinesManager::Instance().createMachine(IP_addr, mac_addr, hostname);
-        MachinesManager::Instance().setMapChanged(true);
-        initialReplicationFor(IP_addr);
-        replicateNewParticipant(IP_addr, mac_addr, hostname);
+        if (IP_addr != getSelfIP()) {
+          cerr << "[D] Machine " << IP_addr << " is unknown! Adding to the map" << endl;
+          MachinesManager::Instance().createMachine(IP_addr, mac_addr, hostname);
+          MachinesManager::Instance().setMapChanged(true);
+          initialReplicationFor(IP_addr);
+          replicateNewParticipant(IP_addr, mac_addr, hostname);
 
-        // Monitoring Subservice
-        thread (monitorateParticipant, IP_addr).detach();
+          // Monitoring Subservice
+          thread (monitorateParticipant, IP_addr).detach();
+        }
       }
     }
 
