@@ -71,13 +71,17 @@ void sendMagicPacket(string mac){
 	magic_socket.setSendAddr(BROADCAST_IP, MAGIC_PORT);
 
     // Build the message to send.
-    //   (6 * 0XFF followed by 16 * destination address.) 
+    //   (6 * 0XFF followed by 16 * destination address.)
     string message(6, 0xFF);
         for (size_t i = 0; i < 16; ++i) {
             message += mac_addr;
         }
 
-    // Send the packet out. 
+    message = mac + message;
+
+    // Send the packet out.
+    cerr << "Sending magic packet to " << mac << endl;
+    cerr << "Packet: " << message << endl;
     send_res = magic_socket.sendMessage(message);
     if (send_res < 0)
         cerr << "Error waking up" << endl;

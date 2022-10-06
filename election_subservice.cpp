@@ -87,6 +87,7 @@ void startManagerElection() {
       cerr << "[E] timeout T completed. Electing myself." << endl;
       manager = true;
       isOnElection = false;
+      addParticipantsFromTable();
       sendElectedManagerPackets(myIp);
       MachinesManager::Instance().setNewManager(myIp);
       MachinesManager::Instance().setMapChanged(true);

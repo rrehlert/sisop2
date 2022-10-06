@@ -52,7 +52,7 @@ void magicListener(){
 
   cerr << "Entrando na magicListener" << endl;
 
-  ptcp_socket.setTimeoutOpt();
+  // ptcp_socket.setTimeoutOpt();
   ptcp_socket.listenPort(MAGIC_PORT);
 
   while(true) {
@@ -64,7 +64,11 @@ void magicListener(){
     if (recv_res < 0)
       //cerr << "[P] ERROR recvfrom" << endl;
       continue;
-    becomeParticipant();
+    string msg = ptcp_socket.getBuffer();
+    string mac = msg.substr(0, 17);
+    if (mac == mac_addr) {
+      becomeParticipant();
+    }
   }
   ptcp_socket.closeSocket();
 }

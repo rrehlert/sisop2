@@ -9,6 +9,7 @@
 #include "socket.cpp"
 #include "information_subservice.cpp"
 #include "election_subservice.cpp"
+#include "discovery_subservice.cpp"
 
 #define PORT 4000
 #define EXIT_PORT 4001
@@ -41,9 +42,9 @@ void listenForServicePackets() {
   ptcp_socket.listenPort(PORT);
 
   while(true) {
-    if (manager) {
-      continue;
-    }
+    // if (manager) {
+    //   continue;
+    // }
     // Listen for packets sent by the manager to PORT
 
     recv_res = ptcp_socket.receiveMessage();
@@ -57,9 +58,9 @@ void listenForServicePackets() {
       string received_hostname = buffer.substr(17);
 
       if (manager && received_ip != getSelfIP()) {
-        cerr << received_ip << " is another manager" << endl;
-        manager = false;
-        startManagerElection();
+        // cerr << received_ip << " is another manager" << endl;
+        // manager = false;
+        // startManagerElection();
       }
 
       if (manager_ip != received_ip || manager_mac != received_mac || manager_hostname != received_hostname) {
@@ -94,6 +95,7 @@ void monitorateManagerStatus() {
       startManagerElection();
       MachinesManager::Instance().createMachine(getSelfIP(), mac_addr, hostname);
       MachinesManager::Instance().setNewManager(getSelfIP());
+      addParticipantsFromTable();
     }
     sleep(1);
   }
